@@ -89,10 +89,10 @@ def get_non_overlap_inner_tangents(x1, y1, x2, y2):
     my2 = y2 + r2 * sin(pi + theta + alpha)
     res.append([(mx1, my1), (mx2, my2)])
 
-    mx1 = x1 + r1 * cos(pi + theta - alpha)
-    my1 = y1 + r1 * sin(pi + theta - alpha)
-    mx2 = x2 + r2 * cos(theta - alpha)
-    my2 = y2 + r2 * sin(theta - alpha)
+    mx1 = x1 + r1 * cos(2 * pi + theta - alpha)
+    my1 = y1 + r1 * sin(2 * pi + theta - alpha)
+    mx2 = x2 + r2 * cos(pi + theta - alpha)
+    my2 = y2 + r2 * sin(pi + theta - alpha)
     res.append([(mx1, my1), (mx2, my2)])
 
     return res
@@ -111,12 +111,12 @@ def draw_tangent(t):
 
 
 x1 = 0.5
-y1 = 1.5
-r1 = 1
+y1 = 1.8
+r1 = 0.5
 
 
 x2 = 2
-y2 = 1.5
+y2 = 1.2
 r2 = 0.2
 
 
@@ -131,6 +131,9 @@ if r2 > r1:
 draw_circle(x1, y1, r1)
 draw_circle(x2, y2, r2)
 
+
+for t in get_non_overlap_inner_tangents(x1, y1, x2, y2):
+    draw_tangent(t)
 
 for t in get_non_overlap_outer_tangents(x1, y1, x2, y2):
     draw_tangent(t)
