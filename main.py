@@ -47,17 +47,77 @@ def get_non_overlap_outer_alpha(x1, y1, x2, y2):
     alpha = pi / 2 - asin((r1 - r2) / d)
     return alpha
 
+def get_non_overlap_outer_tangents(x1, y1, x2, y2):
+    res = []
+
+    theta = get_grid_change_angle(x1, y1, x2, y2)
+    alpha = get_non_overlap_outer_alpha(x1, y1, x2, y1)
+    alpha1 = theta + alpha
+    alpha2 = theta - alpha
+
+    mx1 = x1 + r1 * cos(alpha1)
+    my1 = y1 + r1 * sin(alpha1)
+    mx2 = x2 + r2 * cos(alpha1)
+    my2 = y2 + r2 * sin(alpha1)
+    res.append([(mx1, my1), (mx2, my2)])
+
+
+    mx1 = x1 + r1 * cos(alpha2)
+    my1 = y1 + r1 * sin(alpha2)
+    mx2 = x2 + r2 * cos(alpha2)
+    my2 = y2 + r2 * sin(alpha2)
+    res.append([(mx1, my1), (mx2, my2)])
+
+    return res
+
+def get_non_overlap_inner_alpha(x1, y1, x2, y2):
+    theta = get_grid_change_angle(x1, y1, x2, y2)
+    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    alpha = pi / 2 - asin((r1 + r2) / d)
+    return alpha
+
+def get_non_overlap_inner_tangents(x1, y1, x2, y2):
+    res = []
+
+    theta = get_grid_change_angle(x1, y1, x2, y2)
+    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    alpha = pi / 2 - asin((r1 + r2) / d)
+
+    mx1 = x1 + r1 * cos(theta + alpha)
+    my1 = y1 + r1 * sin(theta + alpha)
+    mx2 = x2 + r2 * cos(pi + theta + alpha)
+    my2 = y2 + r2 * sin(pi + theta + alpha)
+    res.append([(mx1, my1), (mx2, my2)])
+
+    mx1 = x1 + r1 * cos(pi + theta - alpha)
+    my1 = y1 + r1 * sin(pi + theta - alpha)
+    mx2 = x2 + r2 * cos(theta - alpha)
+    my2 = y2 + r2 * sin(theta - alpha)
+    res.append([(mx1, my1), (mx2, my2)])
+
+    return res
+
+
+def draw_tangent(t):
+    mx1, my1 = t[0]
+    mx2, my2 = t[1]
+
+    draw_dot(mx1, my1)
+    draw_dot(mx2, my2)
+
+    draw_infinite_line(mx1, my1, mx2, my2)
+
 
 
 
 x1 = 0.5
 y1 = 1.5
-r1 = 0.2
+r1 = 1
 
 
 x2 = 2
-y2 = 0.55
-r2 = 1
+y2 = 1.5
+r2 = 0.2
 
 
 
@@ -72,40 +132,8 @@ draw_circle(x1, y1, r1)
 draw_circle(x2, y2, r2)
 
 
-theta = get_grid_change_angle(x1, y1, x2, y2)
-alpha = get_non_overlap_outer_alpha(x1, y1, x2, y1)
-alpha1 = theta + alpha
-alpha2 = theta - alpha
-
-
-mx1 = x1 + r1 * cos(alpha1)
-my1 = y1 + r1 * sin(alpha1)
-
-mx2 = x2 + r2 * cos(alpha1)
-my2 = y2 + r2 * sin(alpha1)
-
-
-draw_dot(mx1, my1)
-draw_dot(mx2, my2)
-
-draw_infinite_line(mx1, my1, mx2, my2)
-
-
-
-mx1 = x1 + r1 * cos(alpha2)
-my1 = y1 + r1 * sin(alpha2)
-
-mx2 = x2 + r2 * cos(alpha2)
-my2 = y2 + r2 * sin(alpha2)
-
-
-draw_dot(mx1, my1)
-draw_dot(mx2, my2)
-
-draw_infinite_line(mx1, my1, mx2, my2)
-
-
-
+for t in get_non_overlap_outer_tangents(x1, y1, x2, y2):
+    draw_tangent(t)
 
 
 
