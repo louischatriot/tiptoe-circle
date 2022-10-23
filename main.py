@@ -39,6 +39,15 @@ def get_grid_change_angle(x1, y1, x2, y2):
 
     return theta
 
+# Relative to x axis
+# Case where the two circles do not overlap, the two outer tangents
+def get_non_overlap_outer_alpha(x1, y1, x2, y2):
+    theta = get_grid_change_angle(x1, y1, x2, y2)
+    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    alpha = pi / 2 - asin((r1 - r2) / d)
+    return alpha
+
+
 
 
 x1 = 0.5
@@ -48,7 +57,7 @@ r1 = 0.2
 
 x2 = 2
 y2 = 0.55
-r2 = 0.2
+r2 = 1
 
 
 
@@ -59,21 +68,12 @@ if r2 > r1:
     x2, y2, r2 = swp
 
 
-theta = get_grid_change_angle(x1, y1, x2, y2)
-
-print(theta)
-print(theta * 180 / pi)
-
-
-
 draw_circle(x1, y1, r1)
 draw_circle(x2, y2, r2)
 
 
-d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-alpha = pi / 2 - asin((r1 - r2) / d)
-
+theta = get_grid_change_angle(x1, y1, x2, y2)
+alpha = get_non_overlap_outer_alpha(x1, y1, x2, y1)
 alpha1 = theta + alpha
 alpha2 = theta - alpha
 
