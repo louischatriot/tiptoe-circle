@@ -133,6 +133,24 @@ def circle_segment_intersect(x1, y1, x2, y2, x0, y0, r):
     else:
         return False
 
+# Intersect arc defined as a part of circle 1
+# Two angles are returned
+def circle_circle_intersect_arc(x1, y1, r1, x2, y2, r2):
+    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+    # Circles far away
+    if d >= r1 + r2:
+        return None
+
+    # Small circle in large circle
+    if d < min(r1, r2):
+        return None
+
+    h1 = (r1 ** 2 - r2 ** 2 + d ** 2) / (2 * d)
+    alpha = acos(h1 / r1)
+    theta = get_grid_change_angle(x1, y1, x2, y2)
+    return (theta - alpha, theta + alpha)
+
 def draw_tangent(t):
     mx1, my1 = t[0]
     mx2, my2 = t[1]
@@ -164,7 +182,7 @@ y1 = 1.4
 r1 = 0.5
 
 
-x2 = 1.5
+x2 = 1.4
 y2 = 1.2
 r2 = 0.35
 
@@ -189,29 +207,6 @@ if r2 > r1:
 
 
 
-# Intersect arc defined as a part of circle 1
-# Two angles are returned
-def get_intersect_arc(x1, y1, r1, x2, y2, r2):
-    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-    # Circles far away
-    if d >= r1 + r2:
-        return None
-
-    # Small circle in large circle
-    if d < min(r1, r2):
-        return None
-
-    # Circle centers outside of opposite circle
-    if d >= max(r1, r2):
-        h1 = (r1 ** 2 - r2 ** 2 + d ** 2) / (2 * d)
-        alpha = acos(h1 / r1)
-        theta = get_grid_change_angle(x1, y1, x2, y2)
-        return (theta - alpha, theta + alpha)
-
-    # Small circle inside large circle
-
-
 
 
 
@@ -229,11 +224,9 @@ draw_dot(x2, y2)
 # for t in get_tangents(x1, y1, r1, x2, y2, r2):
     # draw_tangent(t)
 
-res = get_intersect_arc(x1, y1, r1, x2, y2, r2)
+res = circle_circle_intersect_arc(x1, y1, r1, x2, y2, r2)
+
 a, b = res
-
-print(res)
-
 
 draw_arc(x1, y1, r1, a, b)
 # draw_arc(x1, y1, r1, 0, 2*pi)
