@@ -144,10 +144,7 @@ def draw_line_and_dots(x1, y1, x2, y2):
     draw_infinite_line(x1, y1, x2, y2)
 
 def draw_arc(x0, y0, r, angle_start, angle_stop):
-    angle_start = normalize_angle(angle_start)
-    angle_stop = normalize_angle(angle_stop)
-
-    angles = numpy.linspace(angle_start, angle_stop, 100 )
+    angles = numpy.linspace(angle_start, angle_stop, 100)
 
     xs = numpy.cos(angles)
     ys = numpy.sin(angles)
@@ -169,7 +166,7 @@ r1 = 0.5
 
 x2 = 1.5
 y2 = 1.2
-r2 = 0.2
+r2 = 0.35
 
 
 
@@ -212,6 +209,9 @@ def get_intersect_arc(x1, y1, r1, x2, y2, r2):
         theta = get_grid_change_angle(x1, y1, x2, y2)
         return (theta - alpha, theta + alpha)
 
+    # Small circle inside large circle
+
+
 
 
 
@@ -222,14 +222,21 @@ draw_circle(x1, y1, r1)
 draw_circle(x2, y2, r2)
 
 
+draw_dot(x1, y1)
+draw_dot(x2, y2)
+
+
 # for t in get_tangents(x1, y1, r1, x2, y2, r2):
     # draw_tangent(t)
 
 res = get_intersect_arc(x1, y1, r1, x2, y2, r2)
-print(res)
 a, b = res
 
+print(res)
+
+
 draw_arc(x1, y1, r1, a, b)
+# draw_arc(x1, y1, r1, 0, 2*pi)
 
 
 
