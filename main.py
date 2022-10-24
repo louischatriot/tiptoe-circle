@@ -39,19 +39,12 @@ def get_grid_change_angle(x1, y1, x2, y2):
 
     return theta
 
-# Relative to x axis
-# Case where the two circles do not overlap, the two outer tangents
-def get_non_overlap_outer_alpha(x1, y1, x2, y2):
-    theta = get_grid_change_angle(x1, y1, x2, y2)
-    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-    alpha = pi / 2 - asin((r1 - r2) / d)
-    return alpha
-
-def get_non_overlap_outer_tangents(x1, y1, x2, y2):
+def get_non_overlap_outer_tangents(x1, y1, r1, x2, y2, r2):
     res = []
 
     theta = get_grid_change_angle(x1, y1, x2, y2)
-    alpha = get_non_overlap_outer_alpha(x1, y1, x2, y1)
+    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    alpha = pi / 2 - asin((r1 - r2) / d)
     alpha1 = theta + alpha
     alpha2 = theta - alpha
 
@@ -70,13 +63,7 @@ def get_non_overlap_outer_tangents(x1, y1, x2, y2):
 
     return res
 
-def get_non_overlap_inner_alpha(x1, y1, x2, y2):
-    theta = get_grid_change_angle(x1, y1, x2, y2)
-    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-    alpha = pi / 2 - asin((r1 + r2) / d)
-    return alpha
-
-def get_non_overlap_inner_tangents(x1, y1, x2, y2):
+def get_non_overlap_inner_tangents(x1, y1, r1, x2, y2, r2):
     res = []
 
     theta = get_grid_change_angle(x1, y1, x2, y2)
@@ -157,16 +144,14 @@ if r2 > r1:
 
 
 
-x0 = 0.2
-y0 = 1.5
-r0 = 0.42
+# x0 = 0.2
+# y0 = 1.5
+# r0 = 0.42
 
+# draw_circle(x0, y0, r0)
+# draw_line_and_dots(x1, y1, x2, y2)
 
-draw_circle(x0, y0, r0)
-draw_line_and_dots(x1, y1, x2, y2)
-
-
-print(circle_segment_intersect(x1, y1, x2, y2, x0, y0, r0))
+# print(circle_segment_intersect(x1, y1, x2, y2, x0, y0, r0))
 
 
 
@@ -175,15 +160,15 @@ print(circle_segment_intersect(x1, y1, x2, y2, x0, y0, r0))
 
 
 
-# draw_circle(x1, y1, r1)
-# draw_circle(x2, y2, r2)
+draw_circle(x1, y1, r1)
+draw_circle(x2, y2, r2)
 
 
-# for t in get_non_overlap_inner_tangents(x1, y1, x2, y2):
-    # draw_tangent(t)
+for t in get_non_overlap_inner_tangents(x1, y1, r1, x2, y2, r2):
+    draw_tangent(t)
 
-# for t in get_non_overlap_outer_tangents(x1, y1, x2, y2):
-    # draw_tangent(t)
+for t in get_non_overlap_outer_tangents(x1, y1, r1, x2, y2, r2):
+    draw_tangent(t)
 
 
 
