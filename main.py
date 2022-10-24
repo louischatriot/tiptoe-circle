@@ -167,7 +167,7 @@ y1 = 1.4
 r1 = 0.5
 
 
-x2 = 2
+x2 = 1.5
 y2 = 1.2
 r2 = 0.2
 
@@ -192,6 +192,27 @@ if r2 > r1:
 
 
 
+# Intersect arc defined as a part of circle 1
+# Two angles are returned
+def get_intersect_arc(x1, y1, r1, x2, y2, r2):
+    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+    # Circles far away
+    if d >= r1 + r2:
+        return None
+
+    # Small circle in large circle
+    if d < min(r1, r2):
+        return None
+
+    # Circle centers outside of opposite circle
+    if d >= max(r1, r2):
+        h1 = (r1 ** 2 - r2 ** 2 + d ** 2) / (2 * d)
+        alpha = acos(h1 / r1)
+        theta = get_grid_change_angle(x1, y1, x2, y2)
+        return (theta - alpha, theta + alpha)
+
+
 
 
 
@@ -201,10 +222,14 @@ draw_circle(x1, y1, r1)
 draw_circle(x2, y2, r2)
 
 
-for t in get_tangents(x1, y1, r1, x2, y2, r2):
-    draw_tangent(t)
+# for t in get_tangents(x1, y1, r1, x2, y2, r2):
+    # draw_tangent(t)
 
-draw_arc(x1, y1, r1, pi, 5 * pi / 4 - 8 * pi)
+res = get_intersect_arc(x1, y1, r1, x2, y2, r2)
+print(res)
+a, b = res
+
+draw_arc(x1, y1, r1, a, b)
 
 
 
