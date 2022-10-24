@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from math import sqrt, acos, asin, pi, cos, sin
+import numpy
 
 L = 0
 R = 3
@@ -8,13 +9,20 @@ T = 3
 
 dot_size = max(R - L, T - B) / 100
 
-
-
 figure, axes = plt.subplots()
 axes.set_aspect(1)
 axes.set_xlim(0, 3)
 axes.set_ylim(0, 3)
 
+
+def normalize_angle(a):
+    while a < 0:
+        a += 2 * pi
+
+    while a > 2 * pi:
+        a -= 2 * pi
+
+    return a
 
 def draw_circle(x, y, r=0, color='#ffdd00'):
     c = plt.Circle((x, y), r, color=color)
@@ -135,6 +143,21 @@ def draw_line_and_dots(x1, y1, x2, y2):
     draw_dot(x2, y2)
     draw_infinite_line(x1, y1, x2, y2)
 
+def draw_arc(x0, y0, r, angle_start, angle_stop):
+    angle_start = normalize_angle(angle_start)
+    angle_stop = normalize_angle(angle_stop)
+
+    angles = numpy.linspace(angle_start, angle_stop, 100 )
+
+    xs = numpy.cos(angles)
+    ys = numpy.sin(angles)
+
+    xs = [x0 + r * x for x in xs]
+    ys = [y0 + r * y for y in ys]
+
+    plt.plot(xs, ys, color = 'green')
+
+
 
 
 
@@ -181,8 +204,10 @@ draw_circle(x2, y2, r2)
 for t in get_tangents(x1, y1, r1, x2, y2, r2):
     draw_tangent(t)
 
-# for t in get_non_overlap_outer_tangents(x1, y1, r1, x2, y2, r2):
-    # draw_tangent(t)
+draw_arc(x1, y1, r1, pi, 5 * pi / 4 - 8 * pi)
+
+
+
 
 
 
