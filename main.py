@@ -97,15 +97,22 @@ def get_non_overlap_inner_tangents(x1, y1, x2, y2):
 
     return res
 
+# Orthogonally project (x0, y0) on the line between (x1, y1) and (x2, y2)
+def orthogonal_projection(x1, y1, x2, y2, x0, y0):
+    xh = ((y2 - y1) * (x2 - x1) * (y0 - y1) + (y2 - y1) ** 2 * x1 + (x2 - x1) ** 2 * x0) / ((y2 - y1) ** 2 + (x2 - x1) ** 2)
+    yh = (y2 - y1) * (xh - x1) / (x2 - x1) + y1
+    return (xh, yh)
 
 def draw_tangent(t):
     mx1, my1 = t[0]
     mx2, my2 = t[1]
+    draw_line_and_dots(mx1, my1, mx2, my2)
 
-    draw_dot(mx1, my1)
-    draw_dot(mx2, my2)
+def draw_line_and_dots(x1, y1, x2, y2):
+    draw_dot(x1, y1)
+    draw_dot(x2, y2)
+    draw_infinite_line(x1, y1, x2, y2)
 
-    draw_infinite_line(mx1, my1, mx2, my2)
 
 
 
@@ -128,15 +135,36 @@ if r2 > r1:
     x2, y2, r2 = swp
 
 
-draw_circle(x1, y1, r1)
-draw_circle(x2, y2, r2)
+draw_line_and_dots(x1, y1, x2, y2)
+
+x0 = 1
+y0 = 0.5
 
 
-for t in get_non_overlap_inner_tangents(x1, y1, x2, y2):
-    draw_tangent(t)
 
-for t in get_non_overlap_outer_tangents(x1, y1, x2, y2):
-    draw_tangent(t)
+
+
+
+
+xh, yh = orthogonal_projection(x1, y1, x2, y2, x0, y0)
+
+
+draw_line_and_dots(x0, y0, xh, yh)
+
+
+
+
+
+
+# draw_circle(x1, y1, r1)
+# draw_circle(x2, y2, r2)
+
+
+# for t in get_non_overlap_inner_tangents(x1, y1, x2, y2):
+    # draw_tangent(t)
+
+# for t in get_non_overlap_outer_tangents(x1, y1, x2, y2):
+    # draw_tangent(t)
 
 
 
