@@ -103,6 +103,27 @@ def orthogonal_projection(x1, y1, x2, y2, x0, y0):
     yh = (y2 - y1) * (xh - x1) / (x2 - x1) + y1
     return (xh, yh)
 
+# Returns True if the circle with center 0 and radius r intersects the segments between points 1 and 2 (NOT the infinite line)
+def circle_segment_intersect(x1, y1, x2, y2, x0, y0, r):
+    xh, yh = orthogonal_projection(x1, y1, x2, y2, x0, y0)
+
+    # Circle too far from the line
+    if (yh - y0) ** 2 + (xh - x0) ** 2 > r ** 2:
+        return False
+
+    # Dot product of H1 and H2 vectors ; if negative it means H is between 1 and 2 (and circle intersects segment)
+    dp = (x1 - xh) * (x2 - xh) + (y1 - yh) * (y2 - yh)
+    if dp <= 0:
+        return True
+
+    # H outside segment so checking if radius is large enough to intersect
+    dh1 = (x1 - xh) ** 2 + (y1 - yh) ** 2
+    dh2 = (x2 - xh) ** 2 + (y2 - yh) ** 2
+    if min(dh1, dh2) + (xh - x0) ** 2 + (yh - y0) ** 2 > r ** 2:
+        return True
+    else:
+        return False
+
 def draw_tangent(t):
     mx1, my1 = t[0]
     mx2, my2 = t[1]
@@ -135,21 +156,19 @@ if r2 > r1:
     x2, y2, r2 = swp
 
 
+
+x0 = 2
+y0 = 0.8
+r0 = 0.41
+
+
+draw_circle(x0, y0, r0)
 draw_line_and_dots(x1, y1, x2, y2)
 
-x0 = 1
-y0 = 0.5
+
+print(circle_segment_intersect(x1, y1, x2, y2, x0, y0, r0))
 
 
-
-
-
-
-
-xh, yh = orthogonal_projection(x1, y1, x2, y2, x0, y0)
-
-
-draw_line_and_dots(x0, y0, xh, yh)
 
 
 
