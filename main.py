@@ -119,7 +119,7 @@ def circle_segment_intersect(x1, y1, x2, y2, x0, y0, r):
     # H outside segment so checking if radius is large enough to intersect
     dh1 = (x1 - xh) ** 2 + (y1 - yh) ** 2
     dh2 = (x2 - xh) ** 2 + (y2 - yh) ** 2
-    if min(dh1, dh2) + (xh - x0) ** 2 + (yh - y0) ** 2 > r ** 2:
+    if min(dh1, dh2) + (xh - x0) ** 2 + (yh - y0) ** 2 < r ** 2:
         return True
     else:
         return False
@@ -157,9 +157,9 @@ if r2 > r1:
 
 
 
-x0 = 2
-y0 = 0.8
-r0 = 0.41
+x0 = 0.2
+y0 = 1.5
+r0 = 0.42
 
 
 draw_circle(x0, y0, r0)
