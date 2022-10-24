@@ -39,7 +39,7 @@ def get_grid_change_angle(x1, y1, x2, y2):
 
     return theta
 
-def get_non_overlap_outer_tangents(x1, y1, r1, x2, y2, r2):
+def get_outer_tangents(x1, y1, r1, x2, y2, r2):
     res = []
 
     theta = get_grid_change_angle(x1, y1, x2, y2)
@@ -84,6 +84,20 @@ def get_non_overlap_inner_tangents(x1, y1, r1, x2, y2, r2):
 
     return res
 
+def get_tangents(x1, y1, r1, x2, y2, r2):
+    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+    # Small circle fully inside the big circle
+    if d + min(r1, r2) <= max(r1, r2):
+        return []
+
+    res = get_outer_tangents(x1, y1, r1, x2, y2, r2)
+
+    if d > r1 + r2:
+        res += get_non_overlap_inner_tangents(x1, y1, r1, x2, y2, r2)
+
+    return res
+
 # Orthogonally project (x0, y0) on the line between (x1, y1) and (x2, y2)
 def orthogonal_projection(x1, y1, x2, y2, x0, y0):
     xh = ((y2 - y1) * (x2 - x1) * (y0 - y1) + (y2 - y1) ** 2 * x1 + (x2 - x1) ** 2 * x0) / ((y2 - y1) ** 2 + (x2 - x1) ** 2)
@@ -125,8 +139,8 @@ def draw_line_and_dots(x1, y1, x2, y2):
 
 
 
-x1 = 0.5
-y1 = 1.8
+x1 = 1
+y1 = 1.4
 r1 = 0.5
 
 
@@ -164,11 +178,11 @@ draw_circle(x1, y1, r1)
 draw_circle(x2, y2, r2)
 
 
-for t in get_non_overlap_inner_tangents(x1, y1, r1, x2, y2, r2):
+for t in get_tangents(x1, y1, r1, x2, y2, r2):
     draw_tangent(t)
 
-for t in get_non_overlap_outer_tangents(x1, y1, r1, x2, y2, r2):
-    draw_tangent(t)
+# for t in get_non_overlap_outer_tangents(x1, y1, r1, x2, y2, r2):
+    # draw_tangent(t)
 
 
 
