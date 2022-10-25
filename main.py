@@ -24,15 +24,37 @@ def normalize_angle(a):
 
     return a
 
-def draw_circle(x, y, r=0, color='#ffdd00'):
+def draw_infinite_line(x1, y1, x2, y2):
+    axes.axline((x1, y1), (x2, y2))
+
+def draw_line_and_dots(x1, y1, x2, y2):
+    draw_dot(x1, y1)
+    draw_dot(x2, y2)
+    draw_infinite_line(x1, y1, x2, y2)
+
+def draw_tangent(t):
+    mx1, my1 = t[0]
+    mx2, my2 = t[1]
+    draw_line_and_dots(mx1, my1, mx2, my2)
+
+def draw_arc(x0, y0, r, angle_start, angle_stop, color = 'gray'):
+    angles = numpy.linspace(angle_start, angle_stop, 100)
+
+    xs = numpy.cos(angles)
+    ys = numpy.sin(angles)
+
+    xs = [x0 + r * x for x in xs]
+    ys = [y0 + r * y for y in ys]
+
+    plt.plot(xs, ys, color = color)
+
+def draw_circle(x, y, r, color='#ffdd00'):
     c = plt.Circle((x, y), r, color=color)
     axes.add_artist(c)
+    draw_arc(x, y, r, 0, 2 * pi)
 
 def draw_dot(x, y):
     draw_circle(x, y, dot_size, '#000000')
-
-def draw_infinite_line(x1, y1, x2, y2):
-    axes.axline((x1, y1), (x2, y2))
 
 def get_grid_change_angle(x1, y1, x2, y2):
     u = (x2 - x1, y2 - y1)
@@ -151,26 +173,6 @@ def circle_circle_intersect_arc(x1, y1, r1, x2, y2, r2):
     theta = get_grid_change_angle(x1, y1, x2, y2)
     return (theta - alpha, theta + alpha)
 
-def draw_tangent(t):
-    mx1, my1 = t[0]
-    mx2, my2 = t[1]
-    draw_line_and_dots(mx1, my1, mx2, my2)
-
-def draw_line_and_dots(x1, y1, x2, y2):
-    draw_dot(x1, y1)
-    draw_dot(x2, y2)
-    draw_infinite_line(x1, y1, x2, y2)
-
-def draw_arc(x0, y0, r, angle_start, angle_stop):
-    angles = numpy.linspace(angle_start, angle_stop, 100)
-
-    xs = numpy.cos(angles)
-    ys = numpy.sin(angles)
-
-    xs = [x0 + r * x for x in xs]
-    ys = [y0 + r * y for y in ys]
-
-    plt.plot(xs, ys, color = 'green')
 
 
 
@@ -206,29 +208,77 @@ if r2 > r1:
 # print(circle_segment_intersect(x1, y1, x2, y2, x0, y0, r0))
 
 
+from typing import NamedTuple
+
+class Point(NamedTuple):
+    x: float
+    y: float
+
+    def draw(self):
+        draw_dot(self.x, self.y)
+
+class Circle(NamedTuple):
+    ctr: Point
+    r:   float
+
+    def draw(self):
+        draw_circle(self.ctr.x, self.ctr.y, self.r)
 
 
+class CheckPoint(NamedTuple):
+    circle: Circle
+    angle: float
+
+a, b = Point(-3, 1), Point(4.25, 0)
+c = [Circle(Point(0,0), 2.5), Circle(Point(1.5,2), 0.5), Circle(Point(3.5,1), 1), Circle(Point(3.5,-1.7), 1.2)]
 
 
+xmin = min(a[0], b[0])
+xmax = max(a[0], b[0])
+ymin = min(a[1], b[1])
+ymax = max(a[1], b[1])
+
+circles = c
+for c in circles:
+    xmin = min(xmin, c.ctr[0] - c.r)
+    xmax = max(xmax, c.ctr[0] + c.r)
+    ymin = min(ymin, c.ctr[1] - c.r)
+    ymax = max(ymax, c.ctr[1] + c.r)
+
+h = xmax - xmin
+xmin -= h / 10
+xmax += h / 10
+v = ymax - ymin
+ymin -= v / 10
+ymax += v / 10
+
+axes.set_xlim(xmin, xmax)
+axes.set_ylim(ymin, ymax)
 
 
+a.draw()
+b.draw()
 
-draw_circle(x1, y1, r1)
-draw_circle(x2, y2, r2)
+for c in circles:
+    c.draw()
 
 
-draw_dot(x1, y1)
-draw_dot(x2, y2)
+# draw_circle(x1, y1, r1)
+# draw_circle(x2, y2, r2)
+
+
+# draw_dot(x1, y1)
+# draw_dot(x2, y2)
 
 
 # for t in get_tangents(x1, y1, r1, x2, y2, r2):
     # draw_tangent(t)
 
-res = circle_circle_intersect_arc(x1, y1, r1, x2, y2, r2)
+# res = circle_circle_intersect_arc(x1, y1, r1, x2, y2, r2)
 
-a, b = res
+# a, b = res
 
-draw_arc(x1, y1, r1, a, b)
+# draw_arc(x1, y1, r1, a, b)
 # draw_arc(x1, y1, r1, 0, 2*pi)
 
 
