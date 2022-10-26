@@ -88,6 +88,11 @@ def get_outer_tangents_checkpoints(c1, c2):
     (x1, y1), r1 = c1
     (x2, y2), r2 = c2
 
+    # Small circle fully inside the big circle
+    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    if d + min(r1, r2) <= max(r1, r2):
+        return []
+
     theta = get_grid_change_angle(x1, y1, x2, y2)
     d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     alpha = pi / 2 - asin((r1 - r2) / d)
@@ -96,21 +101,14 @@ def get_outer_tangents_checkpoints(c1, c2):
 
     return [[CheckPoint(c1, alpha1), CheckPoint(c2, alpha1)], [CheckPoint(c1, alpha2), CheckPoint(c2, alpha2)]]
 
-def get_outer_tangents(c1, c2):
-    res = []
-    for cps in get_outer_tangents_checkpoints(c1, c2):
-        cp1, cp2 = cps
-        mx1 = cp1.circle.ctr.x + cp1.circle.r * cos(cp1.angle)
-        my1 = cp1.circle.ctr.y + cp1.circle.r * sin(cp1.angle)
-        mx2 = cp2.circle.ctr.x + cp2.circle.r * cos(cp2.angle)
-        my2 = cp2.circle.ctr.y + cp2.circle.r * sin(cp2.angle)
-        res.append([(mx1, my1), (mx2, my2)])
-
-    return res
-
 def get_inner_tangents_checkpoints(c1, c2):
     (x1, y1), r1 = c1
     (x2, y2), r2 = c2
+
+    # Circles overlap
+    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    if d <= r1 + r2:
+        return []
 
     theta = get_grid_change_angle(x1, y1, x2, y2)
     d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
@@ -118,30 +116,18 @@ def get_inner_tangents_checkpoints(c1, c2):
 
     return [[CheckPoint(c1, theta + alpha), CheckPoint(c2, pi + theta + alpha)], [CheckPoint(c1, 2 * pi + theta - alpha), CheckPoint(c2, pi + theta - alpha)]]
 
+def get_tangents_checkpoints(c1, c2):
+    return get_inner_tangents_checkpoints(c1, c2) + get_outer_tangents_checkpoints(c1, c2)
 
-def get_inner_tangents(c1, c2):
+def get_tangents_from_checkpoints(cpl):
     res = []
-    for cps in get_inner_tangents_checkpoints(c1, c2):
+    for cps in cpl:
         cp1, cp2 = cps
         mx1 = cp1.circle.ctr.x + cp1.circle.r * cos(cp1.angle)
         my1 = cp1.circle.ctr.y + cp1.circle.r * sin(cp1.angle)
         mx2 = cp2.circle.ctr.x + cp2.circle.r * cos(cp2.angle)
         my2 = cp2.circle.ctr.y + cp2.circle.r * sin(cp2.angle)
         res.append([(mx1, my1), (mx2, my2)])
-
-    return res
-
-def get_tangents(c1, c2):
-    d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-    # Small circle fully inside the big circle
-    if d + min(r1, r2) <= max(r1, r2):
-        return []
-
-    res = get_outer_tangents(c1, c2)
-
-    if d > r1 + r2:
-        res += get_inner_tangents(c1, c2)
 
     return res
 
@@ -198,7 +184,7 @@ def circle_circle_intersect_arc(x1, y1, r1, x2, y2, r2):
 
 x1 = 1
 y1 = 1.4
-r1 = 0.5
+r1 = 0.8
 
 
 x2 = 2.4
@@ -215,7 +201,7 @@ draw_circle(x2, y2, r2)
 
 
 
-for t in get_tangents(c1, c2):
+for t in get_tangents_from_checkpoints(get_tangents_checkpoints(c1, c2)):
     draw_tangent(t)
 
 
