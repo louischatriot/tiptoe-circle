@@ -240,6 +240,8 @@ def distance(cp1, cp2):
         if (a2 < a1):
             a2 += 2 * pi
 
+        return cp1.circle.r * (a2 - a1)
+
         return 2 * pi * cp1.circle.r / (a2 - a1)
     else:
         x1, y1 = point_from_checkpoint(cp1)
@@ -299,6 +301,17 @@ r2 = 0.35
 
 a, b = Point(-3, 1), Point(4.25, 0)
 c = [Circle(Point(0,0), 2.5), Circle(Point(1.5,2), 0.5), Circle(Point(3.5,1), 1), Circle(Point(3.5,-1.7), 1.2)]
+
+
+a, b = Point(-3.5,0.1), Point(3.5,0.0)
+r = 2.01
+c = [Circle(Point(0,0), 1), Circle(Point(r,0), 1), Circle(Point(r*0.5, r*sqrt(3)/2), 1), Circle(Point(-r*0.5, r*sqrt(3)/2), 1),
+     Circle(Point(-r, 0), 1), Circle(Point(r*0.5, -r*sqrt(3)/2), 1), Circle(Point(-r*0.5, -r*sqrt(3)/2), 1)]
+
+
+# a, b = Point(0,0), Point(20,20)
+# c = [Circle(Point(4,0), 3), Circle(Point(-4,0), 3), Circle(Point(0,4), 3), Circle(Point(0,-4), 3)]
+
 
 
 xmin = min(a[0], b[0])
@@ -412,10 +425,6 @@ for c in circles:
 
 
 # Add all arcs
-# for c in circles:
-
-c = circles[0]
-
 for c in circles:
     circle_checkpoints[c] = sorted(circle_checkpoints[c], key = lambda cp: cp.angle)
 
@@ -470,6 +479,10 @@ while len(done) < len(checkpoints):
                 best_next = cpn
                 best_path = path
 
+    if best_next is None:
+        print("NOTHING")
+        1/0
+
     done[best_next] = (min_d, best_path + [best_next])
 
     if best_next == cpb:
@@ -492,6 +505,9 @@ for i in range(0, len(path) - 1):
     else:
         draw_arc_between_checkpoints(cp1, cp2)
 
+
+for cp in path:
+    draw_dot(point_from_checkpoint(cp))
 
 
 
