@@ -191,8 +191,7 @@ def circle_segment_intersect(cp1, cp2, c):
 # Two angles are returned
 def circle_circle_intersect_arc(c1, c2):
     (x1, y1), r1 = c1
-    (x2, y2), r1 = c2
-
+    (x2, y2), r2 = c2
 
     d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
@@ -228,7 +227,7 @@ def circle_checkpoint_couple_intersect(cp1, cp2, c):
     if au < al:
         au += 2 * pi
 
-    return forbidden_l < al < forbidden_u or forbidden_l < au < forbidden_u
+    return forbidden_l < al < forbidden_u or forbidden_l < au < forbidden_u or (al < forbidden_l and au > forbidden_u)
 
 # Distance between checkpoints
 def distance(cp1, cp2):
@@ -392,6 +391,7 @@ for c in circles:
     for cp1, cp2 in cps:
         if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
             cp = cp2 if cp1.circle == ca else cp1
+            circle_checkpoints[cp.circle].append(cp)
             edges[cpa].append((distance(cpa, cp), cp))
 
             # draw_segment(point_from_checkpoint(cpa), point_from_checkpoint(cp))
@@ -401,6 +401,7 @@ for c in circles:
     for cp1, cp2 in cps:
         if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
             cp = cp2 if cp1.circle == cb else cp1
+            circle_checkpoints[cp.circle].append(cp)
 
             if cp not in edges:
                 edges[cp] = []
@@ -415,17 +416,27 @@ for c in circles:
 
 c = circles[0]
 
-circle_checkpoints[c] = sorted(circle_checkpoints[c], key = lambda cp: cp.angle)
+for c in circles:
+    circle_checkpoints[c] = sorted(circle_checkpoints[c], key = lambda cp: cp.angle)
 
-for i in range(0, len(circle_checkpoints[c]) - 1):
-    cp1 = circle_checkpoints[c][i]
-    cp2 = circle_checkpoints[c][i+1 if i+1 < len(circle_checkpoints[c]) else 0]
+    for i in range(0, len(circle_checkpoints[c])):
+        cp1 = circle_checkpoints[c][i]
+        cp2 = circle_checkpoints[c][i+1 if i+1 < len(circle_checkpoints[c]) else 0]
 
-    if not any(circle_checkpoint_couple_intersect(cp1, cp2, cc) for cc in circles if cc != c):
-        edges[cp1].append((distance(cp1, cp2), cp2))
-        edges[cp2].append((distance(cp1, cp2), cp1))
+        # TODO: Many nil arcs that should be found and killed
 
-        draw_arc_between_checkpoints(cp1, cp2)
+        if not any(circle_checkpoint_couple_intersect(cp1, cp2, cc) for cc in circles if cc != c):
+            if cp1 not in edges:
+                edges[cp1] = []
+
+            edges[cp1].append((distance(cp1, cp2), cp2))
+
+            if cp2 not in edges:
+                edges[cp2] = []
+
+            edges[cp2].append((distance(cp1, cp2), cp1))
+
+            # draw_arc_between_checkpoints(cp1, cp2)
 
 
 
