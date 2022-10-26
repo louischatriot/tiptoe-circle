@@ -62,6 +62,14 @@ def draw_arc(x0, y0, r, angle_start, angle_stop, color = 'gray'):
 
     plt.plot(xs, ys, color = color)
 
+def draw_segment(p1, p2, color = 'gray'):
+    x1, y1 = p1
+    x2, y2 = p2
+    xs = numpy.linspace(x1, x2, 100)
+    ys = numpy.linspace(y1, y2, 100)
+
+    plt.plot(xs, ys, color = color)
+
 def draw_circle(x, y, r, color='#ffdd00', dot=False):
     c = plt.Circle((x, y), r, color=color)
     axes.add_artist(c)
@@ -119,26 +127,32 @@ def get_inner_tangents_checkpoints(c1, c2):
 def get_tangents_checkpoints(c1, c2):
     return get_inner_tangents_checkpoints(c1, c2) + get_outer_tangents_checkpoints(c1, c2)
 
-def get_tangents_from_checkpoints(cpl):
-    res = []
-    for cps in cpl:
-        cp1, cp2 = cps
-        mx1 = cp1.circle.ctr.x + cp1.circle.r * cos(cp1.angle)
-        my1 = cp1.circle.ctr.y + cp1.circle.r * sin(cp1.angle)
-        mx2 = cp2.circle.ctr.x + cp2.circle.r * cos(cp2.angle)
-        my2 = cp2.circle.ctr.y + cp2.circle.r * sin(cp2.angle)
-        res.append([(mx1, my1), (mx2, my2)])
+def point_from_checkpoint(cp):
+    x = cp.circle.ctr.x + cp.circle.r * cos(cp.angle)
+    y = cp.circle.ctr.y + cp.circle.r * sin(cp.angle)
+    return (x, y)
 
-    return res
+def get_tangent_from_checkpoint_couple(cpc):
+    return [point_from_checkpoint(cp) for cp in cpc]
+
+def get_tangents_from_checkpoints(cpl):
+    return [get_tangent_from_checkpoint_couple(cps) for cps in cpl]
 
 # Orthogonally project (x0, y0) on the line between (x1, y1) and (x2, y2)
 def orthogonal_projection(x1, y1, x2, y2, x0, y0):
-    xh = ((y2 - y1) * (x2 - x1) * (y0 - y1) + (y2 - y1) ** 2 * x1 + (x2 - x1) ** 2 * x0) / ((y2 - y1) ** 2 + (x2 - x1) ** 2)
-    yh = (y2 - y1) * (xh - x1) / (x2 - x1) + y1
-    return (xh, yh)
+    if x1 == x2:
+        return (x1, y0)
+    else:
+        xh = ((y2 - y1) * (x2 - x1) * (y0 - y1) + (y2 - y1) ** 2 * x1 + (x2 - x1) ** 2 * x0) / ((y2 - y1) ** 2 + (x2 - x1) ** 2)
+        yh = (y2 - y1) * (xh - x1) / (x2 - x1) + y1
+        return (xh, yh)
 
 # Returns True if the circle with center 0 and radius r intersects the segments between points 1 and 2 (NOT the infinite line)
-def circle_segment_intersect(x1, y1, x2, y2, x0, y0, r):
+def circle_segment_intersect(cp1, cp2, c):
+    x1, y1 = point_from_checkpoint(cp1)
+    x2, y2 = point_from_checkpoint(cp2)
+    (x0, y0), r = c
+
     xh, yh = orthogonal_projection(x1, y1, x2, y2, x0, y0)
 
     # Circle too far from the line
@@ -192,17 +206,21 @@ y2 = 1.2
 r2 = 0.35
 
 
-c1 = Circle(Point(x1, y1), r1)
-c2 = Circle(Point(x2, y2), r2)
+# c1 = Circle(Point(x1, y1), r1)
+# c2 = Circle(Point(x2, y2), r2)
 
-draw_circle(x1, y1, r1)
-draw_circle(x2, y2, r2)
-
-
+# draw_circle(x1, y1, r1)
+# draw_circle(x2, y2, r2)
 
 
-for t in get_tangents_from_checkpoints(get_tangents_checkpoints(c1, c2)):
-    draw_tangent(t)
+
+
+# for t in get_tangents_from_checkpoints(get_tangents_checkpoints(c1, c2)):
+    # a, b = t
+    # draw_segment(a, b)
+    # print(t)
+
+
 
 
 
@@ -253,16 +271,35 @@ axes.set_ylim(ymin, ymax)
 dot_size = max(xmax - xmin, ymax - ymin) / 200
 
 
-# a.draw()
-# b.draw()
+a.draw()
+b.draw()
 
-# for c in circles:
-    # c.draw()
+for c in circles:
+    c.draw()
 
 
 
-edges = {}
 circle_checkpoints = {}
+edges = {}
+
+t = []
+
+for c in circles:
+    for cc in circles:
+        if c == cc:
+            continue
+
+        cps = get_tangents_checkpoints(c, cc)
+
+        for cpc in cps:
+            cp1, cp2 = cpc
+            if not any(circle_segment_intersect(cp1, cp2, ccc) for ccc in circles if ccc != c and ccc != cc):
+                draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
+            # if any()
+
+
+
+
 
 
 
