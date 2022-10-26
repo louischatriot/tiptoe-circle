@@ -251,8 +251,8 @@ def distance(cp1, cp2):
         return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
-def shortest_path_length(a, b, c):
-    circles = c
+def shortest_path_length(a, b, circles):
+    # circles = c
     circle_checkpoints = {}
     edges = {}
 
@@ -317,6 +317,9 @@ def shortest_path_length(a, b, c):
 
                 # draw_segment(point_from_checkpoint(cpb), point_from_checkpoint(cp))
 
+    # From start to finish
+    if not any(circle_segment_intersect(cpa, cpb, c) for c in circles):
+        edges[cpa].append((distance(cpa, cpb), cpb))
 
     # Add all arcs
     for c in circles:
@@ -376,6 +379,7 @@ def shortest_path_length(a, b, c):
         done[best_next] = (min_d, best_path + [best_next])
 
         if best_next == cpb:
+            return done[best_next]
             return min_d
 
 
@@ -388,7 +392,21 @@ def shortest_path_length(a, b, c):
 
 
 a, b = Point(-3, 1), Point(4.25, 0)
-c = [Circle(Point(0,0), 2.5), Circle(Point(1.5,2), 0.5), Circle(Point(3.5,1), 1), Circle(Point(3.5,-1.7), 1.2)]
+circles = [Circle(Point(0,0), 2.5), Circle(Point(1.5,2), 0.5), Circle(Point(3.5,1), 1), Circle(Point(3.5,-1.7), 1.2)]
+
+
+
+
+# a = Point(x=3, y=0)
+# b = Point(x=0, y=4)
+# circles = [Circle(Point(0, 0), 1.0)]
+
+
+
+
+a = Point(x=-2.0000994759611785, y=1.2499553579837084)
+b = Point(x=3.4664484127424657, y=2.7098305765539408)
+circles = [Circle(ctr=Point(x=-1.8726982572115958, y=-1.4505507214926183), r=1.2798830554122105), Circle(ctr=Point(x=4.4052389659918845, y=1.7868544603697956), r=1.1577861715806648), Circle(ctr=Point(x=-1.381234957370907, y=-4.853022729512304), r=1.3571559524396433), Circle(ctr=Point(x=-2.7130564232356846, y=-0.778407237958163), r=1.1078567777993156), Circle(ctr=Point(x=-1.0767320054583251, y=-2.872875838074833), r=1.5301451867213471), Circle(ctr=Point(x=-1.080321369227022, y=-4.562847905326635), r=0.7488734856946393), Circle(ctr=Point(x=4.296537891495973, y=-3.3940289937891066), r=1.056444676569663), Circle(ctr=Point(x=-1.3830888480879366, y=-3.860056472476572), r=1.703816102654673), Circle(ctr=Point(x=-0.6714646681211889, y=0.42927465168759227), r=0.8180872394470498), Circle(ctr=Point(x=-4.1457892511971295, y=4.12491548107937), r=1.1966896192403509), Circle(ctr=Point(x=2.8962924727238715, y=-3.5006185178644955), r=1.2227254134370014), Circle(ctr=Point(x=4.152973096352071, y=-0.4719136538915336), r=1.0627032480435445), Circle(ctr=Point(x=-1.0597760300152004, y=2.6609927020035684), r=1.2917233243351802), Circle(ctr=Point(x=4.492078812327236, y=-0.5311520001851022), r=0.8302998779574409), Circle(ctr=Point(x=1.4652533293701708, y=1.8539306777529418), r=1.171349666523747), Circle(ctr=Point(x=-1.4384943176992238, y=-2.7891610632650554), r=1.3649599430384114), Circle(ctr=Point(x=2.292890746612102, y=1.8301984830759466), r=1.063330560713075), Circle(ctr=Point(x=1.824695912655443, y=-2.114908972289413), r=1.3729172248626127), Circle(ctr=Point(x=1.4497884386219084, y=-4.048559733200818), r=0.5520619102520867), Circle(ctr=Point(x=2.5848811003379524, y=-4.424960787873715), r=1.0701453331159427), Circle(ctr=Point(x=4.131050885189325, y=-1.2276008003391325), r=0.9422143053030595), Circle(ctr=Point(x=-1.2675193906761706, y=-1.8731833971105516), r=0.8241877684602513), Circle(ctr=Point(x=-2.737150730099529, y=2.465134698431939), r=1.073507726821117), Circle(ctr=Point(x=4.898688911926001, y=4.481217071879655), r=1.0780039766104892), Circle(ctr=Point(x=4.031039339024574, y=-2.3442237288691103), r=1.1480808550259098), Circle(ctr=Point(x=3.9417006471194327, y=-3.4770649229176342), r=0.8556844745529815), Circle(ctr=Point(x=1.256994630675763, y=-0.2018730971030891), r=0.6452041073935106), Circle(ctr=Point(x=4.397483908105642, y=-2.3720119544304907), r=1.3364206559723242), Circle(ctr=Point(x=-2.8887587622739375, y=-4.161823575850576), r=0.8661632916191593), Circle(ctr=Point(x=-3.8396280794404447, y=4.662293146830052), r=0.8674290808616205), Circle(ctr=Point(x=3.8026424567215145, y=0.12027687625959516), r=1.2097883184673264), Circle(ctr=Point(x=-1.8230717140249908, y=-1.1450118408538401), r=1.286289065121673)]
 
 
 # a, b = Point(-3.5,0.1), Point(3.5,0.0)
@@ -407,7 +425,6 @@ xmax = max(a[0], b[0])
 ymin = min(a[1], b[1])
 ymax = max(a[1], b[1])
 
-circles = c
 for c in circles:
     xmin = min(xmin, c.ctr[0] - c.r)
     xmax = max(xmax, c.ctr[0] + c.r)
@@ -436,16 +453,16 @@ for c in circles:
 
 
 
-length = shortest_path_length(a, b, c)
+# length = shortest_path_length(a, b, c)
+length, path = shortest_path_length(a, b, circles)
 
 print(length)
 
-1/0
+# 1/0
 
 
 
 
-_, path = done[cpb]
 
 
 for i in range(0, len(path) - 1):
@@ -460,38 +477,6 @@ for i in range(0, len(path) - 1):
 
 for cp in path:
     draw_dot(point_from_checkpoint(cp))
-
-
-
-
-
-# for cp in circle_checkpoints[circles[1]]:
-    # draw_dot(point_from_checkpoint(cp))
-
-
-# for cp1, cp2 in edges[circles[1]]:
-    # draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
-
-
-
-
-# draw_circle(x1, y1, r1)
-# draw_circle(x2, y2, r2)
-
-
-# draw_dot(x1, y1)
-# draw_dot(x2, y2)
-
-
-# for t in get_tangents(x1, y1, r1, x2, y2, r2):
-    # draw_tangent(t)
-
-# res = circle_circle_intersect_arc(x1, y1, r1, x2, y2, r2)
-
-# a, b = res
-
-# draw_arc(x1, y1, r1, a, b)
-# draw_arc(x1, y1, r1, 0, 2*pi)
 
 
 
