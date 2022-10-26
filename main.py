@@ -278,6 +278,13 @@ for c in circles:
     c.draw()
 
 
+a = Circle(a, 0)
+b = Circle(b, 0)
+
+
+circles.append(a)
+circles.append(b)
+
 
 circle_checkpoints = {}
 edges = {}
@@ -294,8 +301,11 @@ for c in circles:
         for cpc in cps:
             cp1, cp2 = cpc
             if not any(circle_segment_intersect(cp1, cp2, ccc) for ccc in circles if ccc != c and ccc != cc):
+
+
+
+
                 draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
-            # if any()
 
 
 
