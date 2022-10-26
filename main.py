@@ -1,4 +1,12 @@
 import matplotlib.pyplot as plt
+
+dot_size = 1/40
+figure, axes = plt.subplots()
+axes.set_aspect(1)
+
+
+
+
 from math import sqrt, acos, asin, pi, cos, sin
 import numpy
 
@@ -22,12 +30,6 @@ class Circle(NamedTuple):
 class CheckPoint(NamedTuple):
     circle: Circle
     angle: float
-
-
-dot_size = 1/40
-figure, axes = plt.subplots()
-axes.set_aspect(1)
-
 
 def normalize_angle(a):
     while a < 0:
@@ -249,54 +251,140 @@ def distance(cp1, cp2):
         return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
+def shortest_path_length(a, b, c):
+    '''Returns length of shortest route from a to b, avoiding the interiors of the circles in c.'''
+    circle_checkpoints = {}
+    edges = {}
+
+    for c in circles:
+        circle_checkpoints[c] = []
+        edges[c] = []
+
+    # Tangents between circles
+    for c in circles:
+        for cc in circles:
+            if c == cc:
+                continue
+
+            cps = get_tangents_checkpoints(c, cc)
+
+            for cp1, cp2 in cps:
+                if not any(circle_segment_intersect(cp1, cp2, ccc) for ccc in circles if ccc != c and ccc != cc):
+                    circle_checkpoints[cp1.circle].append(cp1)
+                    circle_checkpoints[cp2.circle].append(cp2)
+
+                    if cp1 not in edges:
+                        edges[cp1] = []
+
+                    if cp2 not in edges:
+                        edges[cp2] = []
+
+                    edges[cp1].append((distance(cp1, cp2), cp2))
+                    edges[cp2].append((distance(cp1, cp2), cp1))
+
+                    # draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
+
+    # Tangents from start to circles and from circles to end
+    ca = Circle(a, 0)
+    cpa = CheckPoint(ca, 0)
+    edges[cpa] = []
+
+    cb = Circle(b, 0)
+    cpb = CheckPoint(cb, 0)
+
+    for c in circles:
+        cps = get_tangents_checkpoints(ca, c)
+
+        for cp1, cp2 in cps:
+            if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
+                cp = cp2 if cp1.circle == ca else cp1
+                circle_checkpoints[cp.circle].append(cp)
+                edges[cpa].append((distance(cpa, cp), cp))
+
+                # draw_segment(point_from_checkpoint(cpa), point_from_checkpoint(cp))
+
+
+        cps = get_tangents_checkpoints(cb, c)
+        for cp1, cp2 in cps:
+            if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
+                cp = cp2 if cp1.circle == cb else cp1
+                circle_checkpoints[cp.circle].append(cp)
+
+                if cp not in edges:
+                    edges[cp] = []
+
+                edges[cp].append((distance(cpb, cp), cpb))
+
+                # draw_segment(point_from_checkpoint(cpb), point_from_checkpoint(cp))
+
+
+    # Add all arcs
+    for c in circles:
+        circle_checkpoints[c] = sorted(circle_checkpoints[c], key = lambda cp: cp.angle)
+
+        for i in range(0, len(circle_checkpoints[c])):
+            cp1 = circle_checkpoints[c][i]
+            cp2 = circle_checkpoints[c][i+1 if i+1 < len(circle_checkpoints[c]) else 0]
+
+            # TODO: Many nil arcs that should be found and killed
+
+            if not any(circle_checkpoint_couple_intersect(cp1, cp2, cc) for cc in circles if cc != c):
+                if cp1 not in edges:
+                    edges[cp1] = []
+
+                edges[cp1].append((distance(cp1, cp2), cp2))
+
+                if cp2 not in edges:
+                    edges[cp2] = []
+
+                edges[cp2].append((distance(cp1, cp2), cp1))
+
+            # draw_arc_between_checkpoints(cp1, cp2)
+
+    # Djikstra the shit out of this graph
+    done = {}
+    done[cpa] = (0, [cpa])
+
+    checkpoints = edges.keys()
+
+
+    while len(done) < len(checkpoints):
+
+        best_next = None
+        best_path = None
+
+        min_d = 999999999   # Ugly but oh well
+
+        for cp, v in done.items():
+            path_distance, path = v
+
+            if cp not in edges:
+                continue
+
+            for edge_distance, cpn in edges[cp]:
+                if cpn in done:
+                    continue
+
+                if path_distance + edge_distance < min_d:
+                    min_d = path_distance + edge_distance
+                    best_next = cpn
+                    best_path = path
+
+        if best_next is None:
+            return -1
+
+        done[best_next] = (min_d, best_path + [best_next])
+
+        if best_next == cpb:
+            return min_d
 
 
 
 
-x1 = 1
-y1 = 1.4
-r1 = 0.8
-
-
-x2 = 2.4
-y2 = 1.2
-r2 = 0.35
-
-
-# c1 = Circle(Point(x1, y1), r1)
-# c2 = Circle(Point(x2, y2), r2)
-
-# draw_circle(x1, y1, r1)
-# draw_circle(x2, y2, r2)
 
 
 
 
-# for t in get_tangents_from_checkpoints(get_tangents_checkpoints(c1, c2)):
-    # a, b = t
-    # draw_segment(a, b)
-    # print(t)
-
-
-
-
-
-# o1 is origin for largest circle
-# if r2 > r1:
-    # swp = (x1, y1, r1)
-    # x1, y1, r1 = x2, y2, r2
-    # x2, y2, r2 = swp
-
-
-
-# x0 = 0.2
-# y0 = 1.5
-# r0 = 0.42
-
-# draw_circle(x0, y0, r0)
-# draw_line_and_dots(x1, y1, x2, y2)
-
-# print(circle_segment_intersect(x1, y1, x2, y2, x0, y0, r0))
 
 
 a, b = Point(-3, 1), Point(4.25, 0)
@@ -346,154 +434,18 @@ for c in circles:
     c.draw()
 
 
-# a = Circle(a, 0)
-# b = Circle(b, 0)
 
 
-# circles.append(a)
-# circles.append(b)
+length = shortest_path_length(a, b, c)
+
+print(length)
+
+1/0
 
 
-circle_checkpoints = {}
-edges = {}
-
-for c in circles:
-    circle_checkpoints[c] = []
-    edges[c] = []
-
-
-
-
-t = []
-
-# Tangents between circles
-for c in circles:
-    for cc in circles:
-        if c == cc:
-            continue
-
-        cps = get_tangents_checkpoints(c, cc)
-
-        for cp1, cp2 in cps:
-            if not any(circle_segment_intersect(cp1, cp2, ccc) for ccc in circles if ccc != c and ccc != cc):
-                circle_checkpoints[cp1.circle].append(cp1)
-                circle_checkpoints[cp2.circle].append(cp2)
-
-                if cp1 not in edges:
-                    edges[cp1] = []
-
-                if cp2 not in edges:
-                    edges[cp2] = []
-
-                edges[cp1].append((distance(cp1, cp2), cp2))
-                edges[cp2].append((distance(cp1, cp2), cp1))
-
-                # draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
-
-# Tangents from start to circles and from circles to end
-ca = Circle(a, 0)
-cpa = CheckPoint(ca, 0)
-edges[cpa] = []
-
-cb = Circle(b, 0)
-cpb = CheckPoint(cb, 0)
-
-for c in circles:
-    cps = get_tangents_checkpoints(ca, c)
-
-    for cp1, cp2 in cps:
-        if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
-            cp = cp2 if cp1.circle == ca else cp1
-            circle_checkpoints[cp.circle].append(cp)
-            edges[cpa].append((distance(cpa, cp), cp))
-
-            # draw_segment(point_from_checkpoint(cpa), point_from_checkpoint(cp))
-
-
-    cps = get_tangents_checkpoints(cb, c)
-    for cp1, cp2 in cps:
-        if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
-            cp = cp2 if cp1.circle == cb else cp1
-            circle_checkpoints[cp.circle].append(cp)
-
-            if cp not in edges:
-                edges[cp] = []
-
-            edges[cp].append((distance(cpb, cp), cpb))
-
-            # draw_segment(point_from_checkpoint(cpb), point_from_checkpoint(cp))
-
-
-# Add all arcs
-for c in circles:
-    circle_checkpoints[c] = sorted(circle_checkpoints[c], key = lambda cp: cp.angle)
-
-    for i in range(0, len(circle_checkpoints[c])):
-        cp1 = circle_checkpoints[c][i]
-        cp2 = circle_checkpoints[c][i+1 if i+1 < len(circle_checkpoints[c]) else 0]
-
-        # TODO: Many nil arcs that should be found and killed
-
-        if not any(circle_checkpoint_couple_intersect(cp1, cp2, cc) for cc in circles if cc != c):
-            if cp1 not in edges:
-                edges[cp1] = []
-
-            edges[cp1].append((distance(cp1, cp2), cp2))
-
-            if cp2 not in edges:
-                edges[cp2] = []
-
-            edges[cp2].append((distance(cp1, cp2), cp1))
-
-            # draw_arc_between_checkpoints(cp1, cp2)
-
-
-
-
-# Djikstra the shit out of this graph
-done = {}
-done[cpa] = (0, [cpa])
-
-checkpoints = edges.keys()
-
-
-while len(done) < len(checkpoints):
-
-    best_next = None
-    best_path = None
-
-    min_d = 999999999   # Ugly but oh well
-
-    for cp, v in done.items():
-        path_distance, path = v
-
-        if cp not in edges:
-            continue
-
-        for edge_distance, cpn in edges[cp]:
-            if cpn in done:
-                continue
-
-            if path_distance + edge_distance < min_d:
-                min_d = path_distance + edge_distance
-                best_next = cpn
-                best_path = path
-
-    if best_next is None:
-        print("NOTHING")
-        1/0
-
-    done[best_next] = (min_d, best_path + [best_next])
-
-    if best_next == cpb:
-        break
-
-
-print(done[cpb])
 
 
 _, path = done[cpb]
-
 
 
 for i in range(0, len(path) - 1):
