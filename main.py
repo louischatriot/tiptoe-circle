@@ -52,8 +52,8 @@ def draw_tangent(t):
     draw_line_and_dots(mx1, my1, mx2, my2)
 
 def draw_arc(x0, y0, r, angle_start, angle_stop, color = 'gray'):
-    if angle_stop < angle_start:
-        angle_stop += 2 * pi
+    # if angle_stop < angle_start:
+        # angle_stop += 2 * pi
 
     angles = numpy.linspace(angle_start, angle_stop, 100)
 
@@ -303,10 +303,10 @@ a, b = Point(-3, 1), Point(4.25, 0)
 c = [Circle(Point(0,0), 2.5), Circle(Point(1.5,2), 0.5), Circle(Point(3.5,1), 1), Circle(Point(3.5,-1.7), 1.2)]
 
 
-a, b = Point(-3.5,0.1), Point(3.5,0.0)
-r = 2.01
-c = [Circle(Point(0,0), 1), Circle(Point(r,0), 1), Circle(Point(r*0.5, r*sqrt(3)/2), 1), Circle(Point(-r*0.5, r*sqrt(3)/2), 1),
-     Circle(Point(-r, 0), 1), Circle(Point(r*0.5, -r*sqrt(3)/2), 1), Circle(Point(-r*0.5, -r*sqrt(3)/2), 1)]
+# a, b = Point(-3.5,0.1), Point(3.5,0.0)
+# r = 2.01
+# c = [Circle(Point(0,0), 1), Circle(Point(r,0), 1), Circle(Point(r*0.5, r*sqrt(3)/2), 1), Circle(Point(-r*0.5, r*sqrt(3)/2), 1),
+     # Circle(Point(-r, 0), 1), Circle(Point(r*0.5, -r*sqrt(3)/2), 1), Circle(Point(-r*0.5, -r*sqrt(3)/2), 1)]
 
 
 # a, b = Point(0,0), Point(20,20)
