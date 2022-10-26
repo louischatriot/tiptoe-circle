@@ -71,7 +71,7 @@ def draw_arc_between_checkpoints(cp1, cp2):
 
     draw_arc(cp1.circle.ctr.x, cp1.circle.ctr.y, cp1.circle.r, cp1.angle, cp2.angle, color='red')
 
-def draw_segment(p1, p2, color = 'gray'):
+def draw_segment(p1, p2, color = 'red'):
     x1, y1 = p1
     x2, y2 = p2
     xs = numpy.linspace(x1, x2, 100)
@@ -443,6 +443,56 @@ for c in circles:
 
 # Djikstra the shit out of this graph
 done = {}
+done[cpa] = (0, [cpa])
+
+checkpoints = edges.keys()
+
+
+while len(done) < len(checkpoints):
+
+    best_next = None
+    best_path = None
+
+    min_d = 999999999   # Ugly but oh well
+
+    for cp, v in done.items():
+        path_distance, path = v
+
+        if cp not in edges:
+            continue
+
+        for edge_distance, cpn in edges[cp]:
+            if cpn in done:
+                continue
+
+            if path_distance + edge_distance < min_d:
+                min_d = path_distance + edge_distance
+                best_next = cpn
+                best_path = path
+
+    done[best_next] = (min_d, best_path + [best_next])
+
+    if best_next == cpb:
+        break
+
+
+print(done[cpb])
+
+
+_, path = done[cpb]
+
+
+
+for i in range(0, len(path) - 1):
+    cp1 = path[i]
+    cp2 = path[i+1]
+
+    if cp1.circle != cp2.circle:
+        draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
+    else:
+        draw_arc_between_checkpoints(cp1, cp2)
+
+
 
 
 
