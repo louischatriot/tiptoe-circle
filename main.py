@@ -52,6 +52,9 @@ def draw_tangent(t):
     draw_line_and_dots(mx1, my1, mx2, my2)
 
 def draw_arc(x0, y0, r, angle_start, angle_stop, color = 'gray'):
+    if angle_stop < angle_start:
+        angle_stop += 2 * pi
+
     angles = numpy.linspace(angle_start, angle_stop, 100)
 
     xs = numpy.cos(angles)
@@ -61,6 +64,12 @@ def draw_arc(x0, y0, r, angle_start, angle_stop, color = 'gray'):
     ys = [y0 + r * y for y in ys]
 
     plt.plot(xs, ys, color = color)
+
+def draw_arc_between_checkpoints(cp1, cp2):
+    if cp1.circle != cp2.circle:
+        raise ValueError("Checkpoints need to be on the same circle")
+
+    draw_arc(cp1.circle.ctr.x, cp1.circle.ctr.y, cp1.circle.r, cp1.angle, cp2.angle, color='red')
 
 def draw_segment(p1, p2, color = 'gray'):
     x1, y1 = p1
@@ -107,8 +116,8 @@ def get_outer_tangents_checkpoints(c1, c2):
     theta = get_grid_change_angle(x1, y1, x2, y2)
     d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     alpha = pi / 2 - asin((r1 - r2) / d)
-    alpha1 = theta + alpha
-    alpha2 = theta - alpha
+    alpha1 = normalize_angle(theta + alpha)
+    alpha2 = normalize_angle(theta - alpha)
 
     return [[CheckPoint(c1, alpha1), CheckPoint(c2, alpha1)], [CheckPoint(c1, alpha2), CheckPoint(c2, alpha2)]]
 
@@ -125,7 +134,7 @@ def get_inner_tangents_checkpoints(c1, c2):
     d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     alpha = pi / 2 - asin((r1 + r2) / d)
 
-    return [[CheckPoint(c1, theta + alpha), CheckPoint(c2, pi + theta + alpha)], [CheckPoint(c1, 2 * pi + theta - alpha), CheckPoint(c2, pi + theta - alpha)]]
+    return [[CheckPoint(c1, normalize_angle(theta + alpha)), CheckPoint(c2, normalize_angle(pi + theta + alpha))], [CheckPoint(c1, normalize_angle(2 * pi + theta - alpha)), CheckPoint(c2, normalize_angle(pi + theta - alpha))]]
 
 def get_tangents_checkpoints(c1, c2):
     if c1.r == 0 or c2.r == 0:
@@ -180,7 +189,11 @@ def circle_segment_intersect(cp1, cp2, c):
 
 # Intersect arc defined as a part of circle 1
 # Two angles are returned
-def circle_circle_intersect_arc(x1, y1, r1, x2, y2, r2):
+def circle_circle_intersect_arc(c1, c2):
+    (x1, y1), r1 = c1
+    (x2, y2), r1 = c2
+
+
     d = sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
     # Circles far away
@@ -194,8 +207,45 @@ def circle_circle_intersect_arc(x1, y1, r1, x2, y2, r2):
     h1 = (r1 ** 2 - r2 ** 2 + d ** 2) / (2 * d)
     alpha = acos(h1 / r1)
     theta = get_grid_change_angle(x1, y1, x2, y2)
-    return (theta - alpha, theta + alpha)
+    return (normalize_angle(theta - alpha), normalize_angle(theta + alpha))
 
+# Bad pattern from a performance perspective, redoing calculations many times
+def circle_checkpoint_couple_intersect(cp1, cp2, c):
+    if cp1.circle != cp2.circle:
+        raise ValueError("Both checkpoints need to be on the same circle")
+
+    intersect = circle_circle_intersect_arc(cp1.circle, c)
+
+    if intersect is None:
+        return False
+
+    forbidden_l, forbidden_u = intersect
+    if forbidden_u < forbidden_l:
+        forbidden_u += 2 * pi
+
+    al = cp1.angle
+    au = cp2.angle
+    if au < al:
+        au += 2 * pi
+
+    return forbidden_l < al < forbidden_u or forbidden_l < au < forbidden_u
+
+# Distance between checkpoints
+def distance(cp1, cp2):
+    if cp1.circle == cp2.circle:
+        a1 = cp1.angle
+        a2 = cp2.angle
+        if a2 == a1:
+            return 0
+
+        if (a2 < a1):
+            a2 += 2 * pi
+
+        return 2 * pi * cp1.circle.r / (a2 - a1)
+    else:
+        x1, y1 = point_from_checkpoint(cp1)
+        x2, y2 = point_from_checkpoint(cp2)
+        return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
 
@@ -284,12 +334,12 @@ for c in circles:
     c.draw()
 
 
-a = Circle(a, 0)
-b = Circle(b, 0)
+# a = Circle(a, 0)
+# b = Circle(b, 0)
 
 
-circles.append(a)
-circles.append(b)
+# circles.append(a)
+# circles.append(b)
 
 
 circle_checkpoints = {}
@@ -304,6 +354,7 @@ for c in circles:
 
 t = []
 
+# Tangents between circles
 for c in circles:
     for cc in circles:
         if c == cc:
@@ -316,10 +367,73 @@ for c in circles:
                 circle_checkpoints[cp1.circle].append(cp1)
                 circle_checkpoints[cp2.circle].append(cp2)
 
-                edges[cp1.circle].append((cp1, cp2))
-                edges[cp2.circle].append((cp2, cp1))
+                if cp1 not in edges:
+                    edges[cp1] = []
+
+                if cp2 not in edges:
+                    edges[cp2] = []
+
+                edges[cp1].append((distance(cp1, cp2), cp2))
+                edges[cp2].append((distance(cp1, cp2), cp1))
 
                 # draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
+
+# Tangents from start to circles and from circles to end
+ca = Circle(a, 0)
+cpa = CheckPoint(ca, 0)
+edges[cpa] = []
+
+cb = Circle(b, 0)
+cpb = CheckPoint(cb, 0)
+
+for c in circles:
+    cps = get_tangents_checkpoints(ca, c)
+
+    for cp1, cp2 in cps:
+        if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
+            cp = cp2 if cp1.circle == ca else cp1
+            edges[cpa].append((distance(cpa, cp), cp))
+
+            # draw_segment(point_from_checkpoint(cpa), point_from_checkpoint(cp))
+
+
+    cps = get_tangents_checkpoints(cb, c)
+    for cp1, cp2 in cps:
+        if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
+            cp = cp2 if cp1.circle == cb else cp1
+
+            if cp not in edges:
+                edges[cp] = []
+
+            edges[cp].append((distance(cpb, cp), cpb))
+
+            # draw_segment(point_from_checkpoint(cpb), point_from_checkpoint(cp))
+
+
+# Add all arcs
+# for c in circles:
+
+c = circles[0]
+
+circle_checkpoints[c] = sorted(circle_checkpoints[c], key = lambda cp: cp.angle)
+
+for i in range(0, len(circle_checkpoints[c]) - 1):
+    cp1 = circle_checkpoints[c][i]
+    cp2 = circle_checkpoints[c][i+1 if i+1 < len(circle_checkpoints[c]) else 0]
+
+    if not any(circle_checkpoint_couple_intersect(cp1, cp2, cc) for cc in circles if cc != c):
+        edges[cp1].append((distance(cp1, cp2), cp2))
+        edges[cp2].append((distance(cp1, cp2), cp1))
+
+        draw_arc_between_checkpoints(cp1, cp2)
+
+
+
+
+# Djikstra the shit out of this graph
+done = {}
+
+
 
 
 # for cp in circle_checkpoints[circles[1]]:
