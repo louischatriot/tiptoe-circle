@@ -252,7 +252,7 @@ def distance(cp1, cp2):
 
 
 def shortest_path_length(a, b, c):
-    '''Returns length of shortest route from a to b, avoiding the interiors of the circles in c.'''
+    circles = c
     circle_checkpoints = {}
     edges = {}
 
