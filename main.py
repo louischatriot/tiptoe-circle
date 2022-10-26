@@ -76,7 +76,10 @@ def draw_circle(x, y, r, color='#ffdd00', dot=False):
     if not dot:
         draw_arc(x, y, r, 0, 2 * pi)
 
-def draw_dot(x, y):
+def draw_dot(x, y=0):
+    if type(x) != int and type(x) != float:
+        x, y = x
+
     draw_circle(x, y, dot_size, '#000000', True)
 
 def get_grid_change_angle(x1, y1, x2, y2):
@@ -125,7 +128,10 @@ def get_inner_tangents_checkpoints(c1, c2):
     return [[CheckPoint(c1, theta + alpha), CheckPoint(c2, pi + theta + alpha)], [CheckPoint(c1, 2 * pi + theta - alpha), CheckPoint(c2, pi + theta - alpha)]]
 
 def get_tangents_checkpoints(c1, c2):
-    return get_inner_tangents_checkpoints(c1, c2) + get_outer_tangents_checkpoints(c1, c2)
+    if c1.r == 0 or c2.r == 0:
+        return get_outer_tangents_checkpoints(c1, c2)
+    else:
+        return get_inner_tangents_checkpoints(c1, c2) + get_outer_tangents_checkpoints(c1, c2)
 
 def point_from_checkpoint(cp):
     x = cp.circle.ctr.x + cp.circle.r * cos(cp.angle)
@@ -289,6 +295,13 @@ circles.append(b)
 circle_checkpoints = {}
 edges = {}
 
+for c in circles:
+    circle_checkpoints[c] = []
+    edges[c] = []
+
+
+
+
 t = []
 
 for c in circles:
@@ -298,18 +311,23 @@ for c in circles:
 
         cps = get_tangents_checkpoints(c, cc)
 
-        for cpc in cps:
-            cp1, cp2 = cpc
+        for cp1, cp2 in cps:
             if not any(circle_segment_intersect(cp1, cp2, ccc) for ccc in circles if ccc != c and ccc != cc):
+                circle_checkpoints[cp1.circle].append(cp1)
+                circle_checkpoints[cp2.circle].append(cp2)
+
+                edges[cp1.circle].append((cp1, cp2))
+                edges[cp2.circle].append((cp2, cp1))
+
+                # draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
 
 
+# for cp in circle_checkpoints[circles[1]]:
+    # draw_dot(point_from_checkpoint(cp))
 
 
-                draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
-
-
-
-
+# for cp1, cp2 in edges[circles[1]]:
+    # draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
 
 
 
