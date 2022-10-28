@@ -416,8 +416,8 @@ def shortest_path_length(a, b, circles):
         done[best_next] = (min_d, best_path + [best_next])
 
         if best_next == cpb:
-            # return done[best_next]
-            return min_d
+            return done[best_next]
+            # return min_d
 
 def draw_path(path):
     for i in range(0, len(path) - 1):
@@ -474,6 +474,9 @@ circles = [Circle(Point(0,0), 1), Circle(Point(r,0), 1), Circle(Point(r*0.5, r*s
 # c = [Circle(Point(4,0), 3), Circle(Point(-4,0), 3), Circle(Point(0,4), 3), Circle(Point(0,-4), 3)]
 
 
+a = Point(x=1, y=1)
+b = Point(x=5, y=5)
+circles = [Circle(ctr=Point(x=0, y=0), r=0.16287464636843652), Circle(ctr=Point(x=0, y=1), r=0.35239859672728924), Circle(ctr=Point(x=0, y=2), r=0.5364255122607574), Circle(ctr=Point(x=0, y=3), r=0.43006224010605365), Circle(ctr=Point(x=0, y=4), r=0.3106004946632311), Circle(ctr=Point(x=0, y=5), r=0.5266889514634385), Circle(ctr=Point(x=0, y=6), r=0.5684803681215271), Circle(ctr=Point(x=0, y=7), r=0.5833063065307215), Circle(ctr=Point(x=1, y=0), r=0.19940062786918133), Circle(ctr=Point(x=1, y=2), r=0.1901628721738234), Circle(ctr=Point(x=1, y=3), r=0.4963121007895097), Circle(ctr=Point(x=1, y=4), r=0.7945029408903792), Circle(ctr=Point(x=1, y=5), r=0.25107551633846015), Circle(ctr=Point(x=1, y=6), r=0.7169563776114956), Circle(ctr=Point(x=1, y=7), r=0.5250582014909014), Circle(ctr=Point(x=2, y=0), r=0.1930718991206959), Circle(ctr=Point(x=2, y=1), r=0.4261120012728497), Circle(ctr=Point(x=2, y=2), r=0.2375767939025536), Circle(ctr=Point(x=2, y=3), r=0.5907849639421329), Circle(ctr=Point(x=2, y=4), r=0.3803132777335122), Circle(ctr=Point(x=2, y=5), r=0.4899552673799917), Circle(ctr=Point(x=2, y=6), r=0.5319813678273931), Circle(ctr=Point(x=2, y=7), r=0.38447430075611916), Circle(ctr=Point(x=3, y=0), r=0.29231034584809096), Circle(ctr=Point(x=3, y=1), r=0.392366753029637), Circle(ctr=Point(x=3, y=2), r=0.5005855676019564), Circle(ctr=Point(x=3, y=3), r=0.6281589973485097), Circle(ctr=Point(x=3, y=4), r=0.4360745647223666), Circle(ctr=Point(x=3, y=5), r=0.675492997909896), Circle(ctr=Point(x=3, y=6), r=0.3913260711589828), Circle(ctr=Point(x=3, y=7), r=0.49383140334393827), Circle(ctr=Point(x=4, y=0), r=0.2520577947841957), Circle(ctr=Point(x=4, y=1), r=0.5762704281834885), Circle(ctr=Point(x=4, y=2), r=0.3109034419292584), Circle(ctr=Point(x=4, y=3), r=0.605750561482273), Circle(ctr=Point(x=4, y=4), r=0.4061566901626065), Circle(ctr=Point(x=4, y=5), r=0.6387910791439936), Circle(ctr=Point(x=4, y=6), r=0.3983294921228662), Circle(ctr=Point(x=4, y=7), r=0.5167727740248665), Circle(ctr=Point(x=5, y=0), r=0.3643342807190493), Circle(ctr=Point(x=5, y=1), r=0.30225425537209955), Circle(ctr=Point(x=5, y=2), r=0.5889043335104361), Circle(ctr=Point(x=5, y=3), r=0.6993306066608056), Circle(ctr=Point(x=5, y=4), r=0.652983741578646), Circle(ctr=Point(x=5, y=6), r=0.5801291283918545), Circle(ctr=Point(x=5, y=7), r=0.14674811570439486), Circle(ctr=Point(x=6, y=0), r=0.6416853299131616), Circle(ctr=Point(x=6, y=1), r=0.15815935016144067), Circle(ctr=Point(x=6, y=2), r=0.49615327182691543), Circle(ctr=Point(x=6, y=3), r=0.29401245194021614), Circle(ctr=Point(x=6, y=4), r=0.6900777980452403), Circle(ctr=Point(x=6, y=5), r=0.566799630713649), Circle(ctr=Point(x=6, y=6), r=0.3927921340567991), Circle(ctr=Point(x=6, y=7), r=0.5148965323576703), Circle(ctr=Point(x=7, y=0), r=0.12740276546683163), Circle(ctr=Point(x=7, y=1), r=0.503067686338909), Circle(ctr=Point(x=7, y=2), r=0.47778444837313144), Circle(ctr=Point(x=7, y=3), r=0.26259292478207497), Circle(ctr=Point(x=7, y=4), r=0.3290316406404599), Circle(ctr=Point(x=7, y=5), r=0.46293371852952986), Circle(ctr=Point(x=7, y=6), r=0.5243985806358978), Circle(ctr=Point(x=7, y=7), r=0.5472880630055442)]
 
 
 
@@ -522,20 +525,20 @@ dot_size = max(xmax - xmin, ymax - ymin) / 200
 # cp1 = CheckPoint(circle=c1, angle=3)
 # cp2 = CheckPoint(circle=c1, angle=6)
 
-c1 = circles[0]
-c2 = circles[1]
+# c1 = circles[0]
+# c2 = circles[1]
 
 
-cp1 = CheckPoint(circle=c1, angle=1.5707963267948966)
-cp2 = CheckPoint(circle=c1, angle=2.1607840633667426)
+# cp1 = CheckPoint(circle=c1, angle=1.5707963267948966)
+# cp2 = CheckPoint(circle=c1, angle=2.1607840633667426)
 
 
 
 
-cp1 = CheckPoint(circle=c2, angle=0.28379410920832804)
-cp2 = CheckPoint(circle=c2, angle=0.371834264977422)
-cp3 = CheckPoint(circle=c2, angle=1.3326621236922218)
-cp4 = CheckPoint(circle=c2, angle=1.5707963267948966)
+# cp1 = CheckPoint(circle=c2, angle=0.28379410920832804)
+# cp2 = CheckPoint(circle=c2, angle=0.371834264977422)
+# cp3 = CheckPoint(circle=c2, angle=1.3326621236922218)
+# cp4 = CheckPoint(circle=c2, angle=1.5707963267948966)
 
 
 
@@ -547,9 +550,9 @@ cp4 = CheckPoint(circle=c2, angle=1.5707963267948966)
 # cp2.draw()
 
 
-res = circle_checkpoint_couple_intersect(cp1, cp2, c1)
+# res = circle_checkpoint_couple_intersect(cp1, cp2, c1)
 
-print(res)
+# print(res)
 
 
 
@@ -564,7 +567,7 @@ for c in circles:
 t.reset()
 
 res = shortest_path_length(a, b, circles)
-print(res)
+# print(res)
 
 t.time("Calculation done")
 
