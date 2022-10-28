@@ -240,12 +240,25 @@ def circle_circle_intersect_arc(c1, c2):
     theta = get_grid_change_angle(x1, y1, x2, y2)
     return (normalize_angle(theta - alpha), normalize_angle(theta + alpha))
 
+
+# cache = {}
+
+
 # Bad pattern from a performance perspective, redoing calculations many times
 def circle_checkpoint_couple_intersect(cp1, cp2, c):
     if cp1.circle != cp2.circle:
         raise ValueError("Both checkpoints need to be on the same circle")
 
+    # key = str(cp1.circle) + str(c)
+
+    # if key in cache:
+        # intersect = cache[key]
+    # else:
+        # intersect = circle_circle_intersect_arc(cp1.circle, c)
+        # cache[key] = intersect
+
     intersect = circle_circle_intersect_arc(cp1.circle, c)
+
 
     if intersect is None:
         return False
@@ -295,9 +308,15 @@ def shortest_path_length(a, b, circles):
     circle_checkpoints = {}
     edges = {}
 
+    tt = Timer()
+    tt.reset()
+
+
     for c in circles:
         circle_checkpoints[c] = []
         edges[c] = []
+
+    tt.time("Prep")
 
     # Tangents between circles
     NC = len(circles)
@@ -324,6 +343,8 @@ def shortest_path_length(a, b, circles):
                     edges[cp2].append((distance(cp1, cp2), cp1))
 
                     # draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
+
+    tt.time("Tangents between circles")
 
     # Tangents from start to circles and from circles to end
     ca = Circle(a, 0)
@@ -362,6 +383,9 @@ def shortest_path_length(a, b, circles):
     if not any(circle_segment_intersect(cpa, cpb, c) for c in circles):
         edges[cpa].append((distance(cpa, cpb), cpb))
 
+    tt.time("Tangents with start or finish")
+
+
     # Add all arcs
     for c in circles:
         circle_checkpoints[c] = sorted(circle_checkpoints[c], key = lambda cp: cp.angle)
@@ -369,8 +393,6 @@ def shortest_path_length(a, b, circles):
         for i in range(0, len(circle_checkpoints[c])):
             cp1 = circle_checkpoints[c][i]
             cp2 = circle_checkpoints[c][i+1 if i+1 < len(circle_checkpoints[c]) else 0]
-
-            # TODO: Many nil arcs that should be found and killed
 
             if not any(circle_checkpoint_couple_intersect(cp1, cp2, cc) for cc in circles if cc != c):
                 if cp1 not in edges:
@@ -384,6 +406,8 @@ def shortest_path_length(a, b, circles):
                 edges[cp2].append((distance(cp1, cp2), cp1))
 
             # draw_arc_between_checkpoints(cp1, cp2)
+
+    tt.time("Adding arcs")
 
     # Djikstra the shit out of this graph
     done = {}
@@ -418,6 +442,8 @@ def shortest_path_length(a, b, circles):
         done[best_next] = (min_d, best_path + [best_next])
 
         if best_next == cpb:
+            tt.time("Djikstra done")
+
             return done[best_next]
             # return min_d
 
