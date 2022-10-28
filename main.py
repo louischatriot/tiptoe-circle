@@ -27,6 +27,7 @@ t = Timer()
 
 
 
+import itertools
 from math import sqrt, acos, asin, pi, cos, sin
 import numpy
 
@@ -73,15 +74,19 @@ def draw_tangent(t):
     mx2, my2 = t[1]
     draw_line_and_dots(mx1, my1, mx2, my2)
 
-def draw_arc(x0, y0, r, angle_start, angle_stop, color = 'gray'):
-    # if angle_stop < angle_start:
-        # angle_stop += 2 * pi
+def draw_arc(x0, y0, r, angle_start, angle_stop, color = 'gray', minimal_arc=False):
+    if minimal_arc:
+        if angle_stop < angle_start:
+            swp = angle_start
+            angle_start = angle_stop
+            angle_stop = swp
 
-    angles = numpy.linspace(angle_start, angle_stop, 100)
+        if angle_stop - angle_start > pi:
+            angle_start += 2 * pi
 
-    xs = numpy.cos(angles)
-    ys = numpy.sin(angles)
-
+    _angles = numpy.linspace(angle_start, angle_stop, 100)
+    xs = numpy.cos(_angles)
+    ys = numpy.sin(_angles)
     xs = [x0 + r * x for x in xs]
     ys = [y0 + r * y for y in ys]
 
@@ -91,7 +96,7 @@ def draw_arc_between_checkpoints(cp1, cp2):
     if cp1.circle != cp2.circle:
         raise ValueError("Checkpoints need to be on the same circle")
 
-    draw_arc(cp1.circle.ctr.x, cp1.circle.ctr.y, cp1.circle.r, cp1.angle, cp2.angle, color='red')
+    draw_arc(cp1.circle.ctr.x, cp1.circle.ctr.y, cp1.circle.r, cp1.angle, cp2.angle, color='red', minimal_arc=True)
 
 def draw_segment(p1, p2, color = 'red'):
     x1, y1 = p1
@@ -240,14 +245,38 @@ def circle_checkpoint_couple_intersect(cp1, cp2, c):
     if intersect is None:
         return False
 
+    print("=======================")
+    print(intersect)
+
     forbidden_l, forbidden_u = intersect
     if forbidden_u < forbidden_l:
-        forbidden_u += 2 * pi
+        forbiddens = [(forbidden_l, 2 * pi), (0, forbidden_u)]
+    else:
+        forbiddens = [(forbidden_l, forbidden_u)]
 
     al = cp1.angle
     au = cp2.angle
+
+    print(al)
+    print(au)
+
     if au < al:
-        au += 2 * pi
+        arcs = [(al, 2 * pi), (0, au)]
+    else:
+        arcs = [(al, au)]
+
+    print(forbiddens)
+    print(arcs)
+
+    for f, a in itertools.product(forbiddens, arcs):
+        print("----")
+        print(f)
+        print(a)
+
+    if not (min(a[0], a[1]) > f[1] or max(a[0], a[1]) < f[0]):
+        return True
+
+    return False
 
     return forbidden_l < al < forbidden_u or forbidden_l < au < forbidden_u or (al < forbidden_l and au > forbidden_u)
 
@@ -351,6 +380,15 @@ def shortest_path_length(a, b, circles):
 
             # TODO: Many nil arcs that should be found and killed
 
+            for cc in circles:
+                if c == c1 and cc == c2:
+                    print("=================================")
+                    print(cp1)
+                    print(cp2)
+                    print(circle_checkpoint_couple_intersect(cp1, cp2, cc))
+                    print(any(circle_checkpoint_couple_intersect(cp1, cp2, ccc) for ccc in circles if ccc != c))
+
+
             if not any(circle_checkpoint_couple_intersect(cp1, cp2, cc) for cc in circles if cc != c):
                 if cp1 not in edges:
                     edges[cp1] = []
@@ -400,6 +438,18 @@ def shortest_path_length(a, b, circles):
             return done[best_next]
             # return min_d
 
+def draw_path(path):
+    for i in range(0, len(path) - 1):
+        cp1 = path[i]
+        cp2 = path[i+1]
+
+        if cp1.circle != cp2.circle:
+            draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
+        else:
+            draw_arc_between_checkpoints(cp1, cp2)
+
+    for cp in path:
+        draw_dot(point_from_checkpoint(cp))
 
 
 
@@ -444,6 +494,22 @@ circles = [Circle(Point(0,0), 2.5), Circle(Point(1.5,2), 0.5), Circle(Point(3.5,
 
 
 
+
+
+c1 = Circle(ctr=Point(x=2.5404694256371907, y=-4.869915580656232), r=1.1732556252074846)
+c2 = Circle(ctr=Point(x=1.94191656423094, y=-3.6754603904920566), r=0.36437876919035994)
+c3 = Circle(ctr=Point(x=4.457367592097416, y=-3.559350904934763), r=1.239240369878534)
+
+
+a = Point(x=-3.2765678591898135, y=2.547247943254149)
+b = Point(x=3.141350283086986, y=-2.13974422234803)
+circles = [Circle(ctr=Point(x=-4.784896414033268, y=-1.0455496019986932), r=0.8817322165518768), Circle(ctr=Point(x=4.145471538265554, y=3.538717051356869), r=0.9174408101321022), Circle(ctr=Point(x=4.976254007284, y=-1.1580445346055135), r=0.5707021509154219), Circle(ctr=Point(x=-0.598571032111691, y=-0.7842272008477091), r=1.3304132355851732), Circle(ctr=Point(x=0.41888647219273767, y=2.31045885346517), r=0.80274341891308), Circle(ctr=Point(x=-2.1690594691952967, y=-1.1094096565609612), r=0.6770927839120595), Circle(ctr=Point(x=0.2954329236056563, y=2.8540119611245185), r=1.5069093035683954), Circle(ctr=Point(x=2.3143336391537392, y=-0.09531652192724782), r=1.7403073531699074), Circle(ctr=Point(x=0.8528807539271066, y=-2.8227645619805743), r=0.7951412679287908), Circle(ctr=Point(x=-2.288434030699742, y=4.7039009081854015), r=0.6995675578916274), c3, Circle(ctr=Point(x=-1.4985050737352879, y=1.6016223621669345), r=1.436969412648836), Circle(ctr=Point(x=4.319529020148294, y=-1.3618255885812491), r=1.1787759247585852), Circle(ctr=Point(x=0.410067711823493, y=-4.273429767309777), r=1.0712675807765641), Circle(ctr=Point(x=0.47091587473729213, y=-2.92727479931708), r=0.8630026668020074), Circle(ctr=Point(x=2.818615581781633, y=4.486743883717428), r=1.0337679968408602), c2, Circle(ctr=Point(x=4.516781448936254, y=2.0122341097021246), r=1.2304920350686475), c1, Circle(ctr=Point(x=1.7954723938279349, y=-0.4350054514323465), r=0.8679095675676937), Circle(ctr=Point(x=-4.088347675568027, y=-4.985228425238095), r=0.5833450437643506), Circle(ctr=Point(x=3.566275041121453, y=3.7826736414069018), r=1.2096488442984146), Circle(ctr=Point(x=4.38217886362466, y=-1.2102266910814918), r=0.6551666595824323), Circle(ctr=Point(x=-3.859662045853196, y=-4.244834194155498), r=1.1049377947133674), Circle(ctr=Point(x=1.133862142313985, y=0.17962642777637483), r=0.9418681958346495), Circle(ctr=Point(x=-3.974634328774199, y=-4.118061659631854), r=1.0969318301968727), Circle(ctr=Point(x=-4.694801929292327, y=0.4779830500521165), r=1.1679285058844067), Circle(ctr=Point(x=-1.7289413208152205, y=0.8978824865958235), r=0.2810859766695176), Circle(ctr=Point(x=0.09361742581901145, y=-4.630965792608545), r=1.2521769732929666), Circle(ctr=Point(x=-0.1394576665151137, y=-2.0238938263109985), r=1.198695144996872), Circle(ctr=Point(x=-2.5029875508432644, y=-4.708597467489486), r=0.9167210143586118), Circle(ctr=Point(x=2.986480962500976, y=-0.3693886335945551), r=0.8874120265568538), Circle(ctr=Point(x=-2.310427393240473, y=3.398776936812867), r=1.1382730272074124), Circle(ctr=Point(x=-0.6475654592029645, y=4.519456971079229), r=1.15170193978901), Circle(ctr=Point(x=0.9807121353973269, y=4.211675042694099), r=0.7570865612222814), Circle(ctr=Point(x=2.550722063083395, y=2.8258379313184836), r=0.9410884537949162), Circle(ctr=Point(x=2.40150189845306, y=3.492152139096035), r=1.148849853736518), Circle(ctr=Point(x=1.3913665541315745, y=0.5720109590612399), r=0.4604235898185116), Circle(ctr=Point(x=-0.5817849705465716, y=-3.021122980146591), r=1.2736489136351992)]
+
+
+
+
+
+
 xmin = min(a[0], b[0])
 xmax = max(a[0], b[0])
 ymin = min(a[1], b[1])
@@ -468,16 +534,37 @@ axes.set_ylim(ymin, ymax)
 dot_size = max(xmax - xmin, ymax - ymin) / 200
 
 
+
+
+
+
+# cp1 = CheckPoint(circle=c1, angle=3.3)
+# cp2 = CheckPoint(circle=c1, angle=3.1)
+
+
+
+
+# c1.draw()
+# c2.draw()
+# c3.draw()
+
+
+# c1.draw()
+
+# draw_arc_between_checkpoints(cp1, cp2)
+
+
+
+
+
+
+
+
 a.draw()
 b.draw()
 
 for c in circles:
     c.draw()
-
-
-
-
-
 
 t.reset()
 
@@ -486,25 +573,11 @@ length, path = shortest_path_length(a, b, circles)
 t.time("Calculation done")
 
 print(length)
+draw_path(path)
 
 
 
 
-
-
-
-for i in range(0, len(path) - 1):
-    cp1 = path[i]
-    cp2 = path[i+1]
-
-    if cp1.circle != cp2.circle:
-        draw_segment(point_from_checkpoint(cp1), point_from_checkpoint(cp2))
-    else:
-        draw_arc_between_checkpoints(cp1, cp2)
-
-
-for cp in path:
-    draw_dot(point_from_checkpoint(cp))
 
 
 
