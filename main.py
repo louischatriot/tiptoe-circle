@@ -300,10 +300,12 @@ def shortest_path_length(a, b, circles):
         edges[c] = []
 
     # Tangents between circles
-    for c in circles:
-        for cc in circles:
-            if c == cc:
-                continue
+    NC = len(circles)
+
+    for i in range(0, NC):
+        for j in range(i+1, NC):
+            c = circles[i]
+            cc = circles[j]
 
             cps = get_tangents_checkpoints(c, cc)
 
