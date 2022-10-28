@@ -7,6 +7,26 @@ axes.set_aspect(1)
 
 
 
+
+import time
+class Timer():
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.start = time.time()
+
+    def time(self, message = ''):
+        duration = time.time() - self.start
+        print(f"{message} ===> Duration: {duration}")
+        self.reset()
+
+t = Timer()
+
+
+
+
+
 from math import sqrt, acos, asin, pi, cos, sin
 import numpy
 
@@ -202,7 +222,7 @@ def circle_circle_intersect_arc(c1, c2):
         return None
 
     # Small circle in large circle
-    if d < min(r1, r2):
+    if d + min(r1, r2) <=  max(r1, r2):
         return None
 
     h1 = (r1 ** 2 - r2 ** 2 + d ** 2) / (2 * d)
@@ -379,7 +399,7 @@ def shortest_path_length(a, b, circles):
         done[best_next] = (min_d, best_path + [best_next])
 
         if best_next == cpb:
-            return done[best_next]
+            # return done[best_next]
             return min_d
 
 
@@ -453,12 +473,16 @@ for c in circles:
 
 
 
-# length = shortest_path_length(a, b, c)
+
+
+t.reset()
+
 length, path = shortest_path_length(a, b, circles)
+
+t.time("Calculation done")
 
 print(length)
 
-# 1/0
 
 
 
