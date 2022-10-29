@@ -195,25 +195,83 @@ def orthogonal_projection(x1, y1, x2, y2, x0, y0):
         return (xh, yh)
 
 # Returns True if the circle with center 0 and radius r intersects the segments between points 1 and 2 (NOT the infinite line)
-def circle_segment_intersect(cp1, cp2, c):
-    x1, y1 = point_from_checkpoint(cp1)
-    x2, y2 = point_from_checkpoint(cp2)
+def circle_segment_intersect(x1, y1, x2, y2, c):
+    # x1, y1 = point_from_checkpoint(cp1)
+    # x2, y2 = point_from_checkpoint(cp2)
+
+    # x1, y1 = point_from_checkpoint(cp1)
+    # x2, y2 = point_from_checkpoint(cp2)
     (x0, y0), r = c
 
-    xh, yh = orthogonal_projection(x1, y1, x2, y2, x0, y0)
+
+
+    # x2 -= x1
+    # y2 -= y1
+
+    # x0 -= x1
+    # y0 -= y1
+
+    # x1 = 0
+    # y1 = 0
+
+    # theta = get_grid_change_angle(x1, y1, x2, y2)
+
+    # x2 = 0
+    # y2 = sqrt(x2 ** 2 + y2 ** 2)
+
+    # # do = sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2)
+
+    # c = cos(theta)
+    # s = sin(theta)
+
+    # x0p = x0 * c + y0 * s
+    # y0p = y0 * c - x0 * s
+
+    # x0 = x0p
+    # y0 = y0p
+
+
+    # xh = 0
+    # yh = y0
+
+
+    x2 -= x1
+    y2 -= y1
+
+    x0 -= x1
+    y0 -= y1
+
+
+    if 0 == x2:
+        xh = 0
+        yh = y0
+        # return (x1, y0)
+    else:
+        xh = (y2 * x2 * y0 + x2 ** 2 * x0) / (y2 ** 2 + x2 ** 2)
+        yh = y2 * xh / x2
+        # return (xh, yh)
+
+
+
+    # xh, yh = orthogonal_projection(x1, y1, x2, y2, x0, y0)
 
     # Circle too far from the line
-    if (yh - y0) ** 2 + (xh - x0) ** 2 > r ** 2:
+    if (yh - y0) * (yh - y0) + (xh - x0) * (xh - x0) > r * r:
         return False
 
+    x2 -= xh
+    y2 -= yh
+
+
     # Dot product of H1 and H2 vectors ; if negative it means H is between 1 and 2 (and circle intersects segment)
-    dp = (x1 - xh) * (x2 - xh) + (y1 - yh) * (y2 - yh)
-    if dp <= 0:
+    dp = xh * x2 + yh * y2
+    if dp >= 0:
         return True
+    # return True
 
     # H outside segment so checking if radius is large enough to intersect
-    dh1 = (x1 - xh) ** 2 + (y1 - yh) ** 2
-    dh2 = (x2 - xh) ** 2 + (y2 - yh) ** 2
+    dh1 = xh ** 2 + yh ** 2
+    dh2 = x2 ** 2 + y2 ** 2
     if min(dh1, dh2) + (xh - x0) ** 2 + (yh - y0) ** 2 < r ** 2:
         return True
     else:
@@ -304,12 +362,14 @@ def distance(cp1, cp2):
 
 
 def shortest_path_length(a, b, circles):
-    # circles = c
+    NC = len(circles)
     circle_checkpoints = {}
     edges = {}
 
     tt = Timer()
     tt.reset()
+
+    # circle_checkpoints = [[] for i in range(0, NC)]
 
 
     for c in circles:
@@ -319,7 +379,6 @@ def shortest_path_length(a, b, circles):
     tt.time("Prep")
 
     # Tangents between circles
-    NC = len(circles)
 
     for i in range(0, NC):
         for j in range(i+1, NC):
@@ -329,7 +388,10 @@ def shortest_path_length(a, b, circles):
             cps = get_tangents_checkpoints(c, cc)
 
             for cp1, cp2 in cps:
-                if not any(circle_segment_intersect(cp1, cp2, ccc) for ccc in circles if ccc != c and ccc != cc):
+                x1, y1 = point_from_checkpoint(cp1)
+                x2, y2 = point_from_checkpoint(cp2)
+
+                if not any(circle_segment_intersect(x1, y1, x2, y2, ccc) for ccc in circles if ccc != c and ccc != cc):
                     circle_checkpoints[cp1.circle].append(cp1)
                     circle_checkpoints[cp2.circle].append(cp2)
 
@@ -358,7 +420,10 @@ def shortest_path_length(a, b, circles):
         cps = get_tangents_checkpoints(ca, c)
 
         for cp1, cp2 in cps:
-            if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
+            x1, y1 = point_from_checkpoint(cp1)
+            x2, y2 = point_from_checkpoint(cp2)
+
+            if not any(circle_segment_intersect(x1, y1, x2, y2, cc) for cc in circles if cc != c):
                 cp = cp2 if cp1.circle == ca else cp1
                 circle_checkpoints[cp.circle].append(cp)
                 edges[cpa].append((distance(cpa, cp), cp))
@@ -368,7 +433,10 @@ def shortest_path_length(a, b, circles):
 
         cps = get_tangents_checkpoints(cb, c)
         for cp1, cp2 in cps:
-            if not any(circle_segment_intersect(cp1, cp2, cc) for cc in circles if cc != c):
+            x1, y1 = point_from_checkpoint(cp1)
+            x2, y2 = point_from_checkpoint(cp2)
+
+            if not any(circle_segment_intersect(x1, y1, x2, y2, cc) for cc in circles if cc != c):
                 cp = cp2 if cp1.circle == cb else cp1
                 circle_checkpoints[cp.circle].append(cp)
 
@@ -380,7 +448,10 @@ def shortest_path_length(a, b, circles):
                 # draw_segment(point_from_checkpoint(cpb), point_from_checkpoint(cp))
 
     # From start to finish
-    if not any(circle_segment_intersect(cpa, cpb, c) for c in circles):
+    x1, y1 = point_from_checkpoint(cpa)
+    x2, y2 = point_from_checkpoint(cpb)
+
+    if not any(circle_segment_intersect(x1, y1, x2, y2, c) for c in circles):
         edges[cpa].append((distance(cpa, cpb), cpb))
 
     tt.time("Tangents with start or finish")
